@@ -1,7 +1,7 @@
 #ifndef SUBMISSION_HPP_
 #define SUBMISSION_HPP_
 
-#include "cards.hpp"
+#include "card.hpp"
 
 /* 提出されるカードをラップしたクラス。 */
 class Submission {

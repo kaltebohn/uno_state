@@ -1,4 +1,4 @@
-#include "cards.hpp"
+#include "card.hpp"
 
 int Card::card2Key(Card c) {
   if (c.isEmpty()) { return CardSet::kNullKey; }
