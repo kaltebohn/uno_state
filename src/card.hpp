@@ -54,6 +54,9 @@ class Card {
 
   constexpr bool isEmpty() const { return pattern_.valueless_by_exception(); }
 
+  constexpr bool operator ==(const Card& c) const { return color_ == c.color_ && pattern_ == c.pattern_; }
+  constexpr bool operator !=(const Card& c) const { return !(*this == c); }
+
  private:
   const Color color_{Color::kNull};
   const CardPattern pattern_{};
