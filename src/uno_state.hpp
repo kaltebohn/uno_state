@@ -20,7 +20,7 @@ enum class MoveType {
 
 class UnoState {
  public:
-  UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool has_prev_player_not_yelled_uno, bool can_challenge, bool is_challenge_valid)
+  UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool has_prev_player_not_yelled_uno, bool is_challenge_valid)
       : deck_(deck),
         discards_(discards),
         player_cards_(player_cards),
@@ -32,7 +32,6 @@ class UnoState {
         table_color_(table_color),
         table_pattern_(table_pattern),
         has_prev_player_not_yelled_uno_(has_prev_player_not_yelled_uno),
-        can_challenge_(can_challenge),
         is_challenge_valid_(is_challenge_valid)
       {}
 
@@ -76,7 +75,6 @@ class UnoState {
   Color table_color_;
   CardPattern table_pattern_;
   bool has_prev_player_not_yelled_uno_;
-  bool can_challenge_;
   bool is_challenge_valid_;
 
   int nextOf(const int player_num) const {
