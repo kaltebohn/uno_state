@@ -43,17 +43,11 @@ class UnoState {
   /* 合法着手の全体を返す。 */
   std::vector<Move> legalMoves() const;
 
-  /* 可能な提出カードの全体を返す。 */
-  std::vector<Submission> legalSubmissions() const;
-
   /* ゲームが終了しているか？ */
   bool isFinished() const {
     return std::any_of(player_cards_.cbegin(), player_cards_.cend(),
         [](Cards cards){ cards.size() == 0; });
   }
-
-  /* 現在のプレイヤがUNOを宣言すべきか(プレイヤの手札枚数が2枚か)？ */
-  bool currentPlayerShouldYellUNO() const { return player_cards_.at(current_player_).size() == 2; }
 
   /* 指定されたプレイヤ番号の現時点での得点を返す。ゲームが終わっていなければ0。 */
   double getScore(const int player_num) const { return player_scores_.at(player_num); }
@@ -79,6 +73,12 @@ class UnoState {
   bool has_prev_player_not_yelled_uno_;
   bool is_challenge_valid_;
   Card drawn_card_; // 直前にプレイヤが引いたカード。
+
+  /* 可能な提出カードの全体を返す。 */
+  std::vector<Submission> legalSubmissions() const;
+
+  /* 現在のプレイヤがUNOを宣言すべきか(プレイヤの手札枚数が2枚か)？ */
+  bool currentPlayerShouldYellUNO() const { return player_cards_.at(current_player_).size() == 2; }
 
   UnoState nextWhenColorChoice(const Color color) const;
 
