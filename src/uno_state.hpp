@@ -20,7 +20,7 @@ enum class MoveType {
 
 class UnoState {
  public:
-  UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<CardSet, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool has_prev_player_not_yelled_uno, bool can_challenge, bool is_challenge_valid)
+  UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool has_prev_player_not_yelled_uno, bool can_challenge, bool is_challenge_valid)
       : deck_(deck),
         discards_(discards),
         player_cards_(player_cards),
@@ -48,13 +48,11 @@ class UnoState {
   /* ゲームが終了しているか？ */
   bool isFinished() const {
     return std::any_of(player_cards_.cbegin(), player_cards_.cend(),
-        [](CardSet card){
-          return card.getQuantity() == 0;
-        });
+        [](Cards cards){ cards.size() == 0; });
   }
 
   /* 現在のプレイヤがUNOを宣言すべきか(プレイヤの手札枚数が2枚か)？ */
-  bool currentPlayerShouldYellUNO() const { return player_cards_.at(current_player_).getQuantity() == 2; }
+  bool currentPlayerShouldYellUNO() const { return player_cards_.at(current_player_).size() == 2; }
 
   /* 指定されたプレイヤ番号の現時点での得点を返す。ゲームが終わっていなければ0。 */
   double getScore(const int player_num) const { return player_scores_.at(player_num); }
@@ -63,12 +61,12 @@ class UnoState {
   int getCurrentPlayerNum() const { return current_player_; }
 
   /* player_num番目のプレイヤの手札を返す。 */
-  CardSet getPlayerCards(int player_num) const { return player_cards_.at(player_num); }
+  Cards getPlayerCards(int player_num) const { return player_cards_.at(player_num); }
 
  private:
   std::vector<Card> deck_;
   std::vector<Card> discards_;
-  std::array<CardSet, UnoConsts::kNumOfPlayers> player_cards_; // プレイヤ番号で各プレイヤの手札にアクセス。
+  std::array<Cards, UnoConsts::kNumOfPlayers> player_cards_; // プレイヤ番号で各プレイヤの手札にアクセス。
   std::array<int, UnoConsts::kNumOfPlayers> player_seats_; // プレイヤ番号で各プレイヤの席にアクセス。
   std::array<int, UnoConsts::kNumOfPlayers> player_scores_; // プレイヤ番号で各プレイヤの得点にアクセス(ゲーム終了時以外は0)。
   MoveType current_event_;
@@ -94,7 +92,7 @@ class UnoState {
     for (int i = 0; i < num; i++) {
       if (deck_.size() == 0) { refreshDeck(); }
       const Card card = deck_.back(); deck_.pop_back();
-      player_cards_.at(player_number) += card;
+      player_cards_.at(player_number).push_back(card);
     }
   }
 

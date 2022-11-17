@@ -31,7 +31,7 @@ UnoState UnoState::next(Move move) const {
       next_state.current_player_ = prev_player_;
 
       /* 最後に出したカード(ワイルドカード)を手札に戻す。 */
-      next_state.player_cards_.at(prev_player_) += next_state.discards_.back(); next_state.discards_.pop_back();
+      next_state.player_cards_.at(prev_player_).push_back(next_state.discards_.back()); next_state.discards_.pop_back();
 
       /* 場をカードが出される前に戻す。 */
       next_state.table_color_ = next_state.discards_.front().getColor();
@@ -65,7 +65,7 @@ UnoState UnoState::next(Move move) const {
 
   /* カードを場に出す。 */
   next_state.discards_.push_back(card);
-  next_state.player_cards_.at(current_player_) -= card;
+  next_state.player_cards_.at(current_player_).push_back(card);
   next_state.table_color_ = card.getColor();
   next_state.table_pattern_ = card.getPattern();
 
@@ -108,13 +108,13 @@ UnoState UnoState::next(Move move) const {
 
     std::vector<Card> collected_cards;
     for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-      std::copy(player_cards_.at(i).begin(), player_cards_.at(i).end(), collected_cards.begin());
-      player_cards_.at(i).clear();
+      std::copy(next_state.player_cards_.at(i).begin(), next_state.player_cards_.at(i).end(), collected_cards.begin());
+      next_state.player_cards_.at(i).clear();
     }
 
     int player_to_give = next_state.current_player_;
-    for (const auto Card& card : collected_cards) {
-      player_cards_.at(player_to_give).push_back(card);
+    for (const Card& card : collected_cards) {
+      next_state.player_cards_.at(player_to_give).push_back(card);
       player_to_give = nextOf(player_to_give);
     }
   }
@@ -141,7 +141,7 @@ std::vector<Move> UnoState::legalMoves() const {
 
 std::vector<Submission> UnoState::legalSubmissions() const {
   std::vector<Submission> result;
-  for (const Card& card : player_cards_.at(current_player_).getCards()) {
+  for (const Card& card : player_cards_.at(current_player_)) {
     Submission submission{card, currentPlayerShouldYellUNO()};
     if (submission.isLegal(table_color_, table_pattern_)) {
       result.push_back(submission);
