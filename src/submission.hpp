@@ -15,7 +15,7 @@ class Submission {
   bool isLegal(Color table_color, CardPattern table_pattern) const {
     if (card_.getColor() == Color::kNull || card_.getColor() == Color::kWild) { return true; }
 
-    return card_.getColor() == table_color && card_.getPattern() == table_pattern;
+    return card_.getColor() == table_color || card_.getPattern() == table_pattern;
   }
 
  private:

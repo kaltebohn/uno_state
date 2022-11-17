@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../src/card.hpp"
+#include "../../src/card.hpp"
 
 TEST(GetColorTest, NormalColor) {
   Card card1{Color::kBlue, CardNumber::kZero};
@@ -83,7 +83,7 @@ TEST(GetPatternTest, Action) {
 
 TEST(GetPatternTest, Null) {
   Card card{};
-  EXPECT_TRUE(card.getPattern().valueless_by_exception());
+  EXPECT_TRUE(std::holds_alternative<std::monostate>(card.getPattern()));
 }
 
 TEST(IsEmptyTest, True) {

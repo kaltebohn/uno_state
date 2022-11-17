@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../src/submission.hpp"
+#include "../../src/submission.hpp"
 
 TEST(GetCardTest, Normal) {
   Card card{Color::kBlue, CardNumber::kZero};

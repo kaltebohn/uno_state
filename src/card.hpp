@@ -40,8 +40,6 @@ enum class CardAction {
 
 using CardPattern = std::variant<std::monostate, CardNumber, CardAction>;
 
-using Cards = std::vector<Card>;
-
 /* インスタンス1つで1種類のカードを表す。デフォルトで空のカードを表現する(出せるカードがない場合に合法手として使う)。 */
 class Card {
  public:
@@ -52,7 +50,7 @@ class Card {
   constexpr Color getColor() const { return color_; }
   constexpr CardPattern getPattern() const { return pattern_; }
 
-  constexpr bool isEmpty() const { return pattern_.valueless_by_exception(); }
+  constexpr bool isEmpty() const { return std::holds_alternative<std::monostate>(pattern_); }
 
   constexpr bool operator ==(const Card& c) const { return color_ == c.color_ && pattern_ == c.pattern_; }
   constexpr bool operator !=(const Card& c) const { return !(*this == c); }
@@ -61,6 +59,8 @@ class Card {
   const Color color_{Color::kNull};
   const CardPattern pattern_{};
 };
+
+using Cards = std::vector<Card>;
 
 static constexpr int kNumOfCardTypes = 56;
 static constexpr int kNumOfCards = 112;
