@@ -14,13 +14,14 @@
 
 enum class MoveType {
   kSubmission,
+  kSubmissionOfDrawnCard,
   kColorChoice,
   kChallenge
 };
 
 class UnoState {
  public:
-  UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool has_prev_player_not_yelled_uno, bool is_challenge_valid)
+  UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool has_prev_player_not_yelled_uno, bool is_challenge_valid, Card drawn_card)
       : deck_(deck),
         discards_(discards),
         player_cards_(player_cards),
@@ -32,7 +33,8 @@ class UnoState {
         table_color_(table_color),
         table_pattern_(table_pattern),
         has_prev_player_not_yelled_uno_(has_prev_player_not_yelled_uno),
-        is_challenge_valid_(is_challenge_valid)
+        is_challenge_valid_(is_challenge_valid),
+        drawn_card_(drawn_card)
       {}
 
   /* 受け取った手を適用して得られる状態を返す。 */
@@ -76,15 +78,22 @@ class UnoState {
   CardPattern table_pattern_;
   bool has_prev_player_not_yelled_uno_;
   bool is_challenge_valid_;
+  Card drawn_card_; // 直前にプレイヤが引いたカード。
 
-  int nextOf(const int player_num) const {
+  UnoState nextWhenColorChoice(const Color color) const;
+
+  UnoState nextWhenChallenge(const ChallengeFlag will_challenge) const;
+
+  UnoState nextWhenSubmission(const Submission& submission) const;
+
+  int nextPlayerOf(const int player_num) const {
     const auto iter = is_normal_order_ ?
         std::find(player_seats_.begin(), player_seats_.end(), player_seats_.at(player_num) + 1) :
         std::find(player_seats_.begin(), player_seats_.end(), player_seats_.at(player_num) - 1);
     return *iter;
   }
 
-  int nextPlayer() const { return nextOf(current_player_); }
+  int nextPlayer() const { return nextPlayerOf(current_player_); }
 
   void giveCards(const int player_number, const int num) {
     for (int i = 0; i < num; i++) {
