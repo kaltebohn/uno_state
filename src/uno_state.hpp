@@ -27,6 +27,7 @@ class UnoState {
         discards_(),
         player_cards_(),
         player_seats_({0, 1, 2, 3}),
+        current_event_(MoveType::kSubmission),
         prev_player_(-1),
         current_player_(-1),
         is_normal_order_(true),
@@ -81,7 +82,7 @@ class UnoState {
         current_player_ = nextPlayerOf(first_player);
       } else if (submission_action == CardAction::kReverse) {
         current_event_ = MoveType::kSubmission;
-        is_normal_order_ != is_normal_order_;
+        is_normal_order_ = !is_normal_order_;
         current_player_ = nextPlayerOf(first_player);
       } else if (submission_action == CardAction::kSkip) {
         current_event_ = MoveType::kSubmission;
@@ -93,12 +94,13 @@ class UnoState {
     }
   }
 
-  UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool is_challenge_valid, Card drawn_card)
+  UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, MoveType current_event, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool is_challenge_valid, Card drawn_card)
       : deck_(deck),
         discards_(discards),
         player_cards_(player_cards),
         player_seats_(player_seats),
         player_scores_(player_scores),
+        current_event_(current_event),
         prev_player_(prev_player),
         current_player_(current_player),
         is_normal_order_(is_normal_order),
@@ -117,7 +119,7 @@ class UnoState {
   /* ゲームが終了しているか？ */
   bool isFinished() const {
     return std::any_of(player_cards_.cbegin(), player_cards_.cend(),
-        [](Cards cards){ cards.size() == 0; });
+        [](Cards cards){ return cards.size() == 0; });
   }
 
   /* 指定されたプレイヤ番号の現時点での得点を返す。ゲームが終わっていなければ0。 */
@@ -157,25 +159,26 @@ class UnoState {
   UnoState nextWhenSubmission(const Submission& submission) const;
 
   /* 合法手でなければ2枚引かせて手番を飛ばす。 */
-  UnoState UnoState::nextWhenIlligalSubmission() const;
+  UnoState nextWhenIlligalSubmission() const;
 
   /* カードが空なら、カードを引こうとしているとみなす。 */
   UnoState nextWhenEmptyCardSubmission() const;
 
   /* 共通処理を実施した状態に、ドロー2の効果を反映させる。 */
   UnoState nextWhenDrawTwoSubmission(UnoState& state) const {
-    const int current_player{current_player_};
     const int next_player{nextPlayer()};
     state.current_event_ = MoveType::kSubmission;
     state.giveCards(next_player, 2);
     state.current_player_ = nextPlayerOf(next_player); // 次の人を飛ばす。
+    return state;
   }
 
   /* 共通処理を実施した状態に、リバースの効果を反映させる。 */
   UnoState nextWhenReverseSubmission(UnoState& state) const {
     state.current_event_ = MoveType::kSubmission;
-    state.is_normal_order_ != is_normal_order_;
+    state.is_normal_order_ = !is_normal_order_;
     state.current_player_ = state.nextPlayer();
+    return state;
   }
 
   /* 共通処理を実施した状態に、スキップの効果を反映させる。 */
@@ -183,18 +186,20 @@ class UnoState {
     const int current_player{current_player_};
     state.current_event_ = MoveType::kSubmission;
     state.current_player_ = nextPlayerOf(nextPlayerOf(current_player));
+    return state;
   }
 
   /* 共通処理を実施した状態に、ワイルドの効果を反映させる。 */
   UnoState nextWhenWildSubmission(UnoState& state) const {
-    const int current_player{current_player_};
     state.current_event_ = MoveType::kColorChoice;
     state.current_player_ = nextPlayer();
+    return state;
   }
 
   /* 共通処理を実施した状態に、白いワイルドの効果を反映させる。 */
   UnoState nextWhenWildCustomizableSubmission(UnoState& state) const {
     // TODO
+    return state;
   }
 
   /* 共通処理を実施した状態に、ワイルドドロー4の効果を反映させる。 */
@@ -207,6 +212,7 @@ class UnoState {
           const CardPattern pattern = std::get<Submission>(move).getCard().getPattern();
           return std::get<CardAction>(pattern) != CardAction::kWildDraw4;
         }));
+    return state;
   }
 
   /* 共通処理を実施した状態に、シャッフルワイルドの効果を反映させる。 */
@@ -227,6 +233,7 @@ class UnoState {
       state.player_cards_.at(player_to_give).push_back(card);
       player_to_give = nextPlayerOf(player_to_give);
     }
+    return state;
   }
 
   void acceptSubmission(const Submission& submission);

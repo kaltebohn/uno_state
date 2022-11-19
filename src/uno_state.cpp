@@ -16,10 +16,10 @@ UnoState UnoState::next(Move move) const {
     Submission submission = std::get<Submission>(move);
     Card card = submission.getCard();
 
-    if (submission.getCard().isEmpty()) {
+    if (card.isEmpty()) {
       next_state.current_player_ = nextPlayer();
     } else {
-      if (submission.getCard() != drawn_card_ || !submission.isLegal(table_color_, table_pattern_)) {
+      if (card != drawn_card_ || !submission.isLegal(table_color_, table_pattern_)) {
         next_state.giveCards(current_player_, 2);
       } else {
         return nextWhenSubmission(std::get<Submission>(move));
@@ -89,7 +89,6 @@ UnoState UnoState::nextWhenChallenge(const ChallengeFlag will_challenge) const {
 UnoState UnoState::nextWhenSubmission(const Submission& submission) const {
   UnoState next_state{*this};
   const Card card = submission.getCard();
-  const int current_player = current_player_;
 
   if (!submission.isLegal(table_color_, table_pattern_)) {
     return nextWhenIlligalSubmission();
