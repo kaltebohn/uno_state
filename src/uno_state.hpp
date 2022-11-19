@@ -21,6 +21,55 @@ enum class MoveType {
 
 class UnoState {
  public:
+  /* ゲーム開始用。 */
+  UnoState(const Cards& initial_deck, Card initial_table_card = {})
+      : deck_(initial_deck),
+        discards_(),
+        player_cards_(),
+        player_seats_({0, 1, 2, 3}),
+        prev_player_(-1),
+        current_player_(-1),
+        is_normal_order_(true),
+        table_color_(),
+        table_pattern_(),
+        has_prev_player_not_yelled_uno_(),
+        is_challenge_valid_(),
+        drawn_card_() {
+    /* 山札をシャッフル。 */
+    refreshDeck();
+    
+    /* プレイヤにカードを7枚ずつ分配。 */
+    for (int player_num = 0; player_num < UnoConsts::kNumOfPlayers; player_num++) {
+      std::copy(deck_.begin(), deck_.begin() + 7, player_cards_.at(player_num).begin());
+      deck_.erase(deck_.begin(), deck_.begin() + 7);
+    }
+
+    /* 席順をシャッフル。 */
+    // TODO: xorshiftに置き換える。
+    std::random_device seed_gen;
+    std::mt19937 engine(seed_gen());
+    std::shuffle(player_seats_.begin(), player_seats_.end(), engine);
+
+    /* 最初の1枚を出して、効果を処理する。 */
+    /* ワイルドドロー4、シャッフルワイルド、白いワイルドの場合は仕切り直し。 */
+    // TODO: ロジック正しいか確認。
+    // TODO: 効果を処理する。
+    while (initial_table_card.isEmpty()) {
+      const Card tmp_card{deck_.back()};
+      if (!(tmp_card == Card(Color::kWild, CardAction::kWildDraw4) ||
+            tmp_card == Card(Color::kWild, CardAction::kWildShuffleHands) ||
+            tmp_card == Card(Color::kWild, CardAction::kWildCustomizable))) {
+        deck_.pop_back();
+        initial_table_card = tmp_card;
+      } else {
+        refreshDeck();
+      }
+    }
+    discards_.push_back(initial_table_card);
+    table_color_ = initial_table_card.getColor();
+    table_pattern_ =initial_table_card.getPattern();
+  }
+
   UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool has_prev_player_not_yelled_uno, bool is_challenge_valid, Card drawn_card)
       : deck_(deck),
         discards_(discards),
