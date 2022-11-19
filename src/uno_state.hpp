@@ -32,7 +32,6 @@ class UnoState {
         is_normal_order_(true),
         table_color_(),
         table_pattern_(),
-        has_prev_player_not_yelled_uno_(),
         is_challenge_valid_(),
         drawn_card_() {
     /* 山札をシャッフル。 */
@@ -70,7 +69,7 @@ class UnoState {
     table_pattern_ =initial_table_card.getPattern();
   }
 
-  UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool has_prev_player_not_yelled_uno, bool is_challenge_valid, Card drawn_card)
+  UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool is_challenge_valid, Card drawn_card)
       : deck_(deck),
         discards_(discards),
         player_cards_(player_cards),
@@ -81,7 +80,6 @@ class UnoState {
         is_normal_order_(is_normal_order),
         table_color_(table_color),
         table_pattern_(table_pattern),
-        has_prev_player_not_yelled_uno_(has_prev_player_not_yelled_uno),
         is_challenge_valid_(is_challenge_valid),
         drawn_card_(drawn_card)
       {}
@@ -119,7 +117,6 @@ class UnoState {
   bool is_normal_order_;
   Color table_color_;
   CardPattern table_pattern_;
-  bool has_prev_player_not_yelled_uno_;
   bool is_challenge_valid_;
   Card drawn_card_; // 直前にプレイヤが引いたカード。
 
@@ -134,6 +131,81 @@ class UnoState {
   UnoState nextWhenChallenge(const ChallengeFlag will_challenge) const;
 
   UnoState nextWhenSubmission(const Submission& submission) const;
+
+  /* 合法手でなければ2枚引かせて手番を飛ばす。 */
+  UnoState UnoState::nextWhenIlligalSubmission() const;
+
+  /* カードが空なら、カードを引こうとしているとみなす。 */
+  UnoState nextWhenEmptyCardSubmission() const;
+
+  /* 共通処理を実施した状態に、ドロー2の効果を反映させる。 */
+  UnoState nextWhenDrawTwoSubmission(UnoState& state) const {
+    const int current_player{current_player_};
+    const int next_player{nextPlayer()};
+    state.current_event_ = MoveType::kSubmission;
+    state.giveCards(next_player, 2);
+    state.current_player_ = nextPlayerOf(next_player); // 次の人を飛ばす。
+  }
+
+  /* 共通処理を実施した状態に、リバースの効果を反映させる。 */
+  UnoState nextWhenReverseSubmission(UnoState& state) const {
+    state.current_event_ = MoveType::kSubmission;
+    state.is_normal_order_ != is_normal_order_;
+    state.current_player_ = state.nextPlayer();
+  }
+
+  /* 共通処理を実施した状態に、スキップの効果を反映させる。 */
+  UnoState nextWhenSkipSubmission(UnoState& state) const {
+    const int current_player{current_player_};
+    state.current_event_ = MoveType::kSubmission;
+    state.current_player_ = nextPlayerOf(nextPlayerOf(current_player));
+  }
+
+  /* 共通処理を実施した状態に、ワイルドの効果を反映させる。 */
+  UnoState nextWhenWildSubmission(UnoState& state) const {
+    const int current_player{current_player_};
+    state.current_event_ = MoveType::kColorChoice;
+    state.current_player_ = nextPlayer();
+  }
+
+  /* 共通処理を実施した状態に、白いワイルドの効果を反映させる。 */
+  UnoState nextWhenWildCustomizableSubmission(UnoState& state) const {
+    // TODO
+  }
+
+  /* 共通処理を実施した状態に、ワイルドドロー4の効果を反映させる。 */
+  UnoState nextWhenWildDraw4Submission(UnoState& state) const {
+    state.current_event_ = MoveType::kColorChoice;
+    state.current_player_ = nextPlayer();
+    const auto legal_moves = legalMoves();
+    state.is_challenge_valid_ = (std::any_of(legal_moves.begin(), legal_moves.end(),
+        [](Move move) {
+          const CardPattern pattern = std::get<Submission>(move).getCard().getPattern();
+          return std::get<CardAction>(pattern) != CardAction::kWildDraw4;
+        }));
+  }
+
+  /* 共通処理を実施した状態に、シャッフルワイルドの効果を反映させる。 */
+  UnoState nextWhenWildShuffleHandsSubmission(UnoState& state) const {
+    const int next_player = nextPlayer();
+    state.current_event_ = MoveType::kColorChoice;
+    state.current_player_ = next_player;
+
+    std::vector<Card> collected_cards;
+    for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+      std::copy(state.player_cards_.at(i).begin(), state.player_cards_.at(i).end(), collected_cards.begin());
+      state.player_cards_.at(i).clear();
+    }
+    shuffleCards(collected_cards);
+
+    int player_to_give = next_player;
+    for (const Card& card : collected_cards) {
+      state.player_cards_.at(player_to_give).push_back(card);
+      player_to_give = nextPlayerOf(player_to_give);
+    }
+  }
+
+  void acceptSubmission(const Submission& submission);
 
   int nextPlayerOf(const int player_num) const {
     const auto iter = is_normal_order_ ?
@@ -152,7 +224,7 @@ class UnoState {
     }
   }
 
-  void shuffleCards(std::vector<Card> cards) {
+  void shuffleCards(std::vector<Card> cards) const {
     // TODO: xorshiftに置き換える。
     std::random_device seed_gen;
     std::mt19937 engine(seed_gen());
