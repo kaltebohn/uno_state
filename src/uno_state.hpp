@@ -22,8 +22,8 @@ enum class MoveType {
 class UnoState {
  public:
   /* ゲーム開始用。 */
-  UnoState(const Cards& initial_deck, Card initial_table_card = {})
-      : deck_(initial_deck),
+  UnoState(const Cards& first_deck, Card first_table_card = {})
+      : deck_(first_deck),
         discards_(),
         player_cards_(),
         player_seats_({0, 1, 2, 3}),
@@ -49,24 +49,48 @@ class UnoState {
     std::mt19937 engine(seed_gen());
     std::shuffle(player_seats_.begin(), player_seats_.end(), engine);
 
-    /* 最初の1枚を出して、効果を処理する。 */
+    /* 最初の1枚を出す。 */
     /* ワイルドドロー4、シャッフルワイルド、白いワイルドの場合は仕切り直し。 */
-    // TODO: ロジック正しいか確認。
-    // TODO: 効果を処理する。
-    while (initial_table_card.isEmpty()) {
+    while (first_table_card.isEmpty()) {
       const Card tmp_card{deck_.back()};
       if (!(tmp_card == Card(Color::kWild, CardAction::kWildDraw4) ||
             tmp_card == Card(Color::kWild, CardAction::kWildShuffleHands) ||
             tmp_card == Card(Color::kWild, CardAction::kWildCustomizable))) {
         deck_.pop_back();
-        initial_table_card = tmp_card;
+        first_table_card = tmp_card;
       } else {
         refreshDeck();
       }
     }
-    discards_.push_back(initial_table_card);
-    table_color_ = initial_table_card.getColor();
-    table_pattern_ =initial_table_card.getPattern();
+    discards_.push_back(first_table_card);
+    table_color_ = first_table_card.getColor();
+    table_pattern_ =first_table_card.getPattern();
+
+    /* 始点のプレイヤを決定。 */
+    int const first_player = *std::find(player_seats_.begin(), player_seats_.end(), 1);
+
+    /* 最初の1枚の効果を反映させる。 */
+    if (!std::holds_alternative<CardAction>(first_table_card.getPattern())) {
+      current_event_ = MoveType::kSubmission;
+      current_player_ = first_player;
+    } else {
+      const CardAction submission_action = std::get<CardAction>(first_table_card.getPattern());
+      if (submission_action == CardAction::kDrawTwo) {
+        current_event_ = MoveType::kSubmission;
+        giveCards(first_player, 2);
+        current_player_ = nextPlayerOf(first_player);
+      } else if (submission_action == CardAction::kReverse) {
+        current_event_ = MoveType::kSubmission;
+        is_normal_order_ != is_normal_order_;
+        current_player_ = nextPlayerOf(first_player);
+      } else if (submission_action == CardAction::kSkip) {
+        current_event_ = MoveType::kSubmission;
+        current_player_ = nextPlayerOf(first_player);
+      } else if (submission_action == CardAction::kWild) {
+        current_event_ = MoveType::kColorChoice;
+        current_player_ = first_player;
+      }
+    }
   }
 
   UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool is_challenge_valid, Card drawn_card)
