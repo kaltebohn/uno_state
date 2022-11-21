@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "card.hpp"
+#include "submission.hpp"
 #include "move.hpp"
 #include "uno_consts.hpp"
 
@@ -27,7 +28,7 @@ class UnoState {
         discards_(),
         player_cards_(),
         player_seats_({0, 1, 2, 3}),
-        current_event_(MoveType::kSubmission),
+        current_move_type_(MoveType::kSubmission),
         prev_player_(-1),
         current_player_(-1),
         is_normal_order_(true),
@@ -72,23 +73,23 @@ class UnoState {
 
     /* 最初の1枚の効果を反映させる。 */
     if (!std::holds_alternative<CardAction>(first_table_card.getPattern())) {
-      current_event_ = MoveType::kSubmission;
+      current_move_type_ = MoveType::kSubmission;
       current_player_ = first_player;
     } else {
       const CardAction submission_action = std::get<CardAction>(first_table_card.getPattern());
       if (submission_action == CardAction::kDrawTwo) {
-        current_event_ = MoveType::kSubmission;
+        current_move_type_ = MoveType::kSubmission;
         giveCards(first_player, 2);
         current_player_ = nextPlayerOf(first_player);
       } else if (submission_action == CardAction::kReverse) {
-        current_event_ = MoveType::kSubmission;
+        current_move_type_ = MoveType::kSubmission;
         is_normal_order_ = !is_normal_order_;
         current_player_ = nextPlayerOf(first_player);
       } else if (submission_action == CardAction::kSkip) {
-        current_event_ = MoveType::kSubmission;
+        current_move_type_ = MoveType::kSubmission;
         current_player_ = nextPlayerOf(first_player);
       } else if (submission_action == CardAction::kWild) {
-        current_event_ = MoveType::kColorChoice;
+        current_move_type_ = MoveType::kColorChoice;
         current_player_ = first_player;
       }
     }
@@ -100,7 +101,7 @@ class UnoState {
         player_cards_(player_cards),
         player_seats_(player_seats),
         player_scores_(player_scores),
-        current_event_(current_event),
+        current_move_type_(current_event),
         prev_player_(prev_player),
         current_player_(current_player),
         is_normal_order_(is_normal_order),
@@ -131,13 +132,16 @@ class UnoState {
   /* player_num番目のプレイヤの手札を返す。 */
   Cards getPlayerCards(int player_num) const { return player_cards_.at(player_num); }
 
+  /* 現時点で期待している着手の型を返す。 */
+  MoveType getCurrentMoveType() const { return current_move_type_; }
+
  private:
   std::vector<Card> deck_;
   std::vector<Card> discards_;
   std::array<Cards, UnoConsts::kNumOfPlayers> player_cards_; // プレイヤ番号で各プレイヤの手札にアクセス。
   std::array<int, UnoConsts::kNumOfPlayers> player_seats_; // プレイヤ番号で各プレイヤの席にアクセス。
   std::array<int, UnoConsts::kNumOfPlayers> player_scores_; // プレイヤ番号で各プレイヤの得点にアクセス(ゲーム終了時以外は0)。
-  MoveType current_event_;
+  MoveType current_move_type_;
   int prev_player_;
   int current_player_;
   bool is_normal_order_;
@@ -167,7 +171,7 @@ class UnoState {
   /* 共通処理を実施した状態に、ドロー2の効果を反映させる。 */
   UnoState nextWhenDrawTwoSubmission(UnoState& state) const {
     const int next_player{nextPlayer()};
-    state.current_event_ = MoveType::kSubmission;
+    state.current_move_type_ = MoveType::kSubmission;
     state.giveCards(next_player, 2);
     state.current_player_ = nextPlayerOf(next_player); // 次の人を飛ばす。
     return state;
@@ -175,7 +179,7 @@ class UnoState {
 
   /* 共通処理を実施した状態に、リバースの効果を反映させる。 */
   UnoState nextWhenReverseSubmission(UnoState& state) const {
-    state.current_event_ = MoveType::kSubmission;
+    state.current_move_type_ = MoveType::kSubmission;
     state.is_normal_order_ = !is_normal_order_;
     state.current_player_ = state.nextPlayer();
     return state;
@@ -184,14 +188,14 @@ class UnoState {
   /* 共通処理を実施した状態に、スキップの効果を反映させる。 */
   UnoState nextWhenSkipSubmission(UnoState& state) const {
     const int current_player{current_player_};
-    state.current_event_ = MoveType::kSubmission;
+    state.current_move_type_ = MoveType::kSubmission;
     state.current_player_ = nextPlayerOf(nextPlayerOf(current_player));
     return state;
   }
 
   /* 共通処理を実施した状態に、ワイルドの効果を反映させる。 */
   UnoState nextWhenWildSubmission(UnoState& state) const {
-    state.current_event_ = MoveType::kColorChoice;
+    state.current_move_type_ = MoveType::kColorChoice;
     state.current_player_ = nextPlayer();
     return state;
   }
@@ -204,7 +208,7 @@ class UnoState {
 
   /* 共通処理を実施した状態に、ワイルドドロー4の効果を反映させる。 */
   UnoState nextWhenWildDraw4Submission(UnoState& state) const {
-    state.current_event_ = MoveType::kColorChoice;
+    state.current_move_type_ = MoveType::kColorChoice;
     state.current_player_ = nextPlayer();
     const auto legal_moves = legalMoves();
     state.is_challenge_valid_ = (std::any_of(legal_moves.begin(), legal_moves.end(),
@@ -218,7 +222,7 @@ class UnoState {
   /* 共通処理を実施した状態に、シャッフルワイルドの効果を反映させる。 */
   UnoState nextWhenWildShuffleHandsSubmission(UnoState& state) const {
     const int next_player = nextPlayer();
-    state.current_event_ = MoveType::kColorChoice;
+    state.current_move_type_ = MoveType::kColorChoice;
     state.current_player_ = next_player;
 
     std::vector<Card> collected_cards;
