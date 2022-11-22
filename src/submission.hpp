@@ -18,6 +18,12 @@ class Submission {
     return card_.getColor() == table_color || card_.getPattern() == table_pattern;
   }
 
+  constexpr bool operator ==(const Submission& submission) const {
+    return card_ == submission.card_ && should_yell_UNO_ == submission.should_yell_UNO_;
+  }
+
+  constexpr bool operator !=(const Submission& submission) const { return *this == submission; }
+
  private:
   Card card_{};
   bool should_yell_UNO_{};

@@ -135,6 +135,27 @@ class UnoState {
   /* 現時点で期待している着手の型を返す。 */
   MoveType getCurrentMoveType() const { return current_move_type_; }
 
+  /* テスト用。 */
+  bool operator ==(const UnoState& state) const {
+    if (!std::equal(state.deck_.cbegin(), state.deck_.cend(), deck_.begin())) { return false; }
+    if (!std::equal(state.discards_.cbegin(), state.discards_.cend(), discards_.begin())) { return false; }         
+    for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+      if (!std::equal(state.player_cards_.at(i).cbegin(), state.player_cards_.at(i).cend(), player_cards_.at(i).begin())) { return false; }         
+    }
+    if (!std::equal(state.player_seats_.cbegin(), state.player_seats_.cend(), player_seats_.begin())) { return false; }         
+    if (!std::equal(state.player_scores_.cbegin(), state.player_scores_.cend(), player_scores_.begin())) { return false; }         
+    if (state.current_move_type_ != current_move_type_) { return false; }
+    if (state.prev_player_ != prev_player_) { return false; }
+    if (state.current_player_ != current_player_) { return false; }
+    if (state.is_normal_order_ != is_normal_order_) { return false; }
+    if (state.table_color_ != table_color_) { return false; }
+    if (state.table_pattern_ != table_pattern_) { return false; }
+    if (state.is_challenge_valid_ != is_challenge_valid_) { return false; }
+    if (state.drawn_card_ != drawn_card_) { return false; }
+
+    return true;
+  }
+
  private:
   std::vector<Card> deck_;
   std::vector<Card> discards_;
