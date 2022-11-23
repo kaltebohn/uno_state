@@ -2,6 +2,12 @@
 
 #include "../../src/uno_state.hpp"
 
+/*
+  状態遷移テスト。チャレンジができる状態で、チャレンジをしない場合。
+  前状態: 前プレイヤがワイルドドロー4を出した。
+  着手: チャレンジしない。
+  次状態: 現プレイヤが山札から4枚引いて、次プレイヤに手番が移る。 
+*/
 TEST(StateTransitionTest, NotChallenge) {
   Card table_card{Card::kWildDraw4};
   Cards src_deck{allCards()};
@@ -61,6 +67,12 @@ TEST(StateTransitionTest, NotChallenge) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。チャレンジができる状態で、チャレンジをして失敗した場合。
+  前状態: 前プレイヤがワイルドドロー4を出した。
+  着手: チャレンジする。
+  次状態: チャレンジフラグを戻し、現プレイヤが山札から6枚引いて、次プレイヤに手番が移る。 
+*/
 TEST(StateTransitionTest, ChallengeFailed) {
   Card table_card{Card::kWildDraw4};
   Cards src_deck{allCards()};
@@ -122,6 +134,12 @@ TEST(StateTransitionTest, ChallengeFailed) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。チャレンジができる状態で、チャレンジをして成功した場合。
+  前状態: 前プレイヤがワイルドドロー4を出した。
+  着手: チャレンジする。
+  次状態: チャレンジフラグを戻し、前プレイヤが山札から4枚引いて、ワイルドドロー4を前プレイヤの手札に戻し、前プレイヤに手番が移る。 
+*/
 TEST(StateTransitionTest, ChallengeSucceeded) {
   Card table_card{Card::kWildDraw4};
   Cards src_deck{allCards()};
@@ -182,6 +200,12 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。ワイルド系提出後、色を選択する場合。
+  前状態: 現プレイヤがワイルドを出した。
+  着手: 青色を選択する。
+  次状態: チャレンジフラグを戻し、場の色が青色になって、現プレイヤの提出手番になる。
+*/
 TEST(StateTransitionTest, ColorChoice) {
   Card table_card{Card::kWild};
   Cards deck{allCards()};
@@ -235,6 +259,12 @@ TEST(StateTransitionTest, ColorChoice) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。ワイルド系提出後、選べない色を選択する場合。
+  前状態: 現プレイヤがワイルドを出した。
+  着手: ワイルド色(ソース上で型として指定されているが、UNOの場の色ではありえない)を選択する。
+  次状態: 現プレイヤが山札から2枚引いて、次プレイヤに手番が移る。
+*/
 TEST(StateTransitionTest, IlligalColorChoice) {
   Card table_card{Card::kWild};
   Cards src_deck{allCards()};
@@ -293,6 +323,12 @@ TEST(StateTransitionTest, IlligalColorChoice) {
 
 }
 
+/*
+  状態遷移テスト。カードを引いた後、引いたカードを提出する場合。
+  前状態: 前プレイヤが青0を出した後、現プレイヤが空の手を出した。カードとして、青2を受け取る。
+  着手: 引いたカード(青2)を提出する。
+  次状態: 提出が受理され、次プレイヤに手番が移る。
+*/
 TEST(StateTransitionTest, SubmissionOfDrawnCard) {
   Card table_card{Card::kBlueZero};
   Cards src_deck{allCards()};
@@ -354,6 +390,12 @@ TEST(StateTransitionTest, SubmissionOfDrawnCard) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。カードを引いた後、引いたカードを違法だが提出する場合。
+  前状態: 前プレイヤが緑0を出した後、現プレイヤが空の手を出した。カードとして、青2を受け取る。
+  着手: 引いたカード(青2)を提出する。
+  次状態: 提出が拒否され、現プレイヤが山札から2枚引いて、次プレイヤに手番が移る。
+*/
 TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
   Card table_card{Card::kGreenZero};
   Cards src_deck{allCards()};
@@ -412,6 +454,73 @@ TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。カードを引いた後、空のカードを提出する場合。
+  前状態: 前プレイヤが青0を出した後、現プレイヤが空の手を出した。カードとして、青2を受け取る。
+  着手: 空のカードを提出する。
+  次状態: 次プレイヤに手番が移る。
+*/
+TEST(StateTransitionTest, EmptySubmissionOfDrawnCard) {
+  Card table_card{Card::kBlueZero};
+  Cards src_deck{allCards()};
+  src_deck.erase(std::find(src_deck.begin(), src_deck.end(), table_card));
+
+  Card drawn_card{Card::kBlueTwo};
+  std::array<Cards, UnoConsts::kNumOfPlayers> player_cards{{
+      {{Card::kBlueOne, drawn_card}},
+      {{Card::kGreenOne}},
+      {{Card::kRedOne}},
+      {{Card::kYellowOne}}
+  }};
+  for (int i = 0; i < 4; i++) {
+    for (const Card& card : player_cards.at(i)) {
+      src_deck.erase(std::find(src_deck.begin(), src_deck.end(), card));
+    }
+  }
+
+  UnoState src_state{
+      src_deck,
+      Cards{table_card},
+      player_cards,
+      std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
+      std::array<int, UnoConsts::kNumOfPlayers>{},
+      MoveType::kSubmissionOfDrawnCard,
+      3,
+      0,
+      true,
+      table_card.getColor(),
+      table_card.getPattern(),
+      false,
+      drawn_card
+  };
+  UnoState dst_state{src_state.next(Submission({}, false))};
+
+  Cards target_deck{src_deck};
+  UnoState target_state{
+      target_deck,
+      Cards{table_card},
+      player_cards,
+      std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
+      std::array<int, UnoConsts::kNumOfPlayers>{},
+      MoveType::kSubmission,
+      0,
+      1,
+      true,
+      drawn_card.getColor(),
+      drawn_card.getPattern(),
+      false,
+      Card{}
+  };
+
+  EXPECT_EQ(dst_state, target_state);
+}
+
+/*
+  状態遷移テスト。違法な提出の場合。
+  前状態: 前プレイヤが緑0を出した。
+  着手: 青3を提出する。
+  次状態: 提出が拒否され、現プレイヤが山札から2枚引いて、次プレイヤに手番が移る。
+*/
 TEST(StateTransitionTest, IlligalSubmission) {
   const Card submitted_card{Card::kBlueThree};
   const Card table_card{Card::kGreenZero};
@@ -468,6 +577,12 @@ TEST(StateTransitionTest, IlligalSubmission) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。空の提出の場合。
+  前状態: 前プレイヤが青0を出した。
+  着手: 空のカードを提出する。
+  次状態: 現プレイヤが山札から1枚引いて、現プレイヤの引いたカードの提出手番になる。
+*/
 TEST(StateTransitionTest, EmptyCardSubmission) {
   Card table_card{Card::kBlueZero};
   Cards src_deck{allCards()};
@@ -524,6 +639,12 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。数字カードの提出の場合。
+  前状態: 前プレイヤが青0を出した。
+  着手: 青3を提出する。
+  次状態: 提出が受理され、次プレイヤに手番が移る。
+*/
 TEST(StateTransitionTest, NumberSubmission) {
   const Card submitted_card{Card::kBlueThree};
   const Card table_card{Card::kBlueZero};
@@ -582,6 +703,12 @@ TEST(StateTransitionTest, NumberSubmission) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。ドロー2の提出の場合。
+  前状態: 前プレイヤが青0を出した。
+  着手: 青ドロー2を提出する。
+  次状態: 提出が受理され、次プレイヤが山札から2枚引いて、その次のプレイヤに手番が移る。
+*/
 TEST(StateTransitionTest, DrawTwoSubmission) {
   const Card submitted_card{Card::kBlueDrawTwo};
   const Card table_card{Card::kBlueZero};
@@ -643,6 +770,12 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。リバースの提出の場合。
+  前状態: 前プレイヤが青0を出した。
+  着手: 青リバースを提出する。
+  次状態: 提出が受理され、周り順が逆転し、その順番における次プレイヤに手番が移る。
+*/
 TEST(StateTransitionTest, ReverseSubmission) {
   const Card submitted_card{Card::kBlueReverse};
   const Card table_card{Card::kBlueZero};
@@ -701,6 +834,12 @@ TEST(StateTransitionTest, ReverseSubmission) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。スキップの提出の場合。
+  前状態: 前プレイヤが青0を出した。
+  着手: 青スキップを提出する。
+  次状態: 提出が受理され、次の次のプレイヤに手番が移る。
+*/
 TEST(StateTransitionTest, SkipSubmission) {
   const Card submitted_card{Card::kBlueSkip};
   const Card table_card{Card::kBlueZero};
@@ -759,6 +898,12 @@ TEST(StateTransitionTest, SkipSubmission) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。ワイルドの提出の場合。
+  前状態: 前プレイヤが青0を出した。
+  着手: ワイルドを提出する。
+  次状態: 提出が受理され、現プレイヤの色選択手番になる。
+*/
 TEST(StateTransitionTest, WildSubmission) {
   const Card submitted_card{Card::kWild};
   const Card table_card{Card::kBlueZero};
@@ -817,10 +962,22 @@ TEST(StateTransitionTest, WildSubmission) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。白いワイルドの提出の場合。
+  前状態: 前プレイヤが青0を出した。
+  着手: 白いワイルドを提出する。
+  次状態: 提出が受理され、白いワイルドの効果が発揮される。
+*/
 TEST(StateTransitionTest, WildCustomizableSubmission) {
   // TODO
 }
 
+/*
+  状態遷移テスト。ワイルドドロー4の提出の場合。
+  前状態: 前プレイヤが青0を出した。
+  着手: ワイルドドロー4を提出する。
+  次状態: 提出が受理され、チャレンジ有効フラグを更新した後、現プレイヤの色選択手番になる。
+*/
 TEST(StateTransitionTest, WildDraw4Submission) {
   const Card submitted_card{Card::kWildDraw4};
   const Card table_card{Card::kBlueZero};
@@ -879,6 +1036,12 @@ TEST(StateTransitionTest, WildDraw4Submission) {
   EXPECT_EQ(dst_state, target_state);
 }
 
+/*
+  状態遷移テスト。ワイルドドロー4の提出の場合。
+  前状態: 前プレイヤが青0を出した。
+  着手: ワイルドドロー4を提出する。
+  次状態: 提出が受理され、チャレンジ有効フラグを更新した後、現プレイヤの色選択手番になる。
+*/
 TEST(StateTransitionTest, WildShuffleHandsSubmission) {
   const Card submitted_card{Card::kWildShuffleHands};
   const Card table_card{Card::kBlueZero};
@@ -924,6 +1087,10 @@ TEST(StateTransitionTest, WildShuffleHandsSubmission) {
   }
 }
 
+/*
+  合法手列挙テスト。色選択の場合。
+  期待する出力: {青, 緑, 赤, 黄色}。
+*/
 TEST(LegalMovesTest, ColorChoice) {
   Card table_card{Card::kWild};
   Cards deck{allCards()};
@@ -966,6 +1133,10 @@ TEST(LegalMovesTest, ColorChoice) {
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Color::kYellow), legal_moves.end());
 }
 
+/*
+  合法手列挙テスト。チャレンジの場合。
+  期待する出力: {True, False}。
+*/
 TEST(LegalMovesTest, Challenge) {
   Card table_card{Card::kWildDraw4};
   Cards deck{allCards()};
@@ -1006,6 +1177,10 @@ TEST(LegalMovesTest, Challenge) {
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)false), legal_moves.end());
 }
 
+/*
+  合法手列挙テスト。引いたカードの提出の場合。
+  期待する出力: {空のカード, 引いたカード}。
+*/
 TEST(LegalMovesTest, SubmissionOfDrawnCard) {
   Card table_card{Card::kBlueZero};
   Cards deck{allCards()};
@@ -1046,6 +1221,10 @@ TEST(LegalMovesTest, SubmissionOfDrawnCard) {
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{drawn_card, false}), legal_moves.end());
 }
 
+/*
+  合法手列挙テスト。引いたカードの提出で、出せるカードがない場合。
+  期待する出力: {空のカード}。
+*/
 TEST(LegalMovesTest, SubmissionOfDrawnCardNothing) {
   Card table_card{Card::kGreenZero};
   Cards deck{allCards()};
@@ -1086,6 +1265,10 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardNothing) {
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{{}, false}), legal_moves.end());
 }
 
+/*
+  合法手列挙テスト。引いたカードの提出で、現プレイヤの手札が2枚の場合。
+  期待する出力: {空のカード, 引いたカード}。引いたカードのUNO宣言フラグが立っている。
+*/
 TEST(LegalMovesTest, SubmissionOfDrawnCardOnUNO) {
   Card table_card{Card::kBlueZero};
   Cards deck{allCards()};
@@ -1126,6 +1309,10 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardOnUNO) {
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{drawn_card, true}), legal_moves.end());
 }
 
+/*
+  合法手列挙テスト。複数枚のカードの提出の場合。
+  期待する出力: {空のカード, 青1, 青ドロー2, 緑0}。
+*/
 TEST(LegalMovesTest, SubmissionMultiple) {
   Card table_card{Card::kBlueZero};
   Cards deck{allCards()};
@@ -1167,6 +1354,10 @@ TEST(LegalMovesTest, SubmissionMultiple) {
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{Card::kGreenZero, false}), legal_moves.end());
 }
 
+/*
+  合法手列挙テスト。複数枚のカードの提出の場合。
+  期待する出力: {空のカード, 青1, 青ドロー2, 緑0}。空のカード以外のUNO宣言フラグが立っている。
+*/
 TEST(LegalMovesTest, SubmissionMultipleOnUno) {
   Card table_card{Card::kBlueZero};
   Cards deck{allCards()};
@@ -1207,6 +1398,10 @@ TEST(LegalMovesTest, SubmissionMultipleOnUno) {
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{Card::kBlueDrawTwo, true}), legal_moves.end());
 }
 
+/*
+  合法手列挙テスト。提出で、出せるカードがない場合。
+  期待する出力: {空のカード}。
+*/
 TEST(LegalMovesTest, SubmissionNothing) {
   Card table_card{Card::kBlueZero};
   Cards deck{allCards()};
