@@ -1,5 +1,20 @@
 #include "uno_state.hpp"
 
+std::string moveType2String(const MoveType move_type) {
+  switch (move_type) {
+    case MoveType::kSubmission:
+      return "提出";
+    case MoveType::kSubmissionOfDrawnCard:
+      return "引いたカードの提出";
+    case MoveType::kColorChoice:
+      return "色の選択";
+    case MoveType::kChallenge:
+      return "チャレンジ";
+    default:
+      return "不適切な着手型";
+  }
+}
+
 UnoState UnoState::next(Move move) const {
   /* カードの効果に関する処理はすべてkSubmissionのときに行う。 */
   /* 他のイベントでは、着手への対応と現在プレイヤの変更だけする。 */
@@ -193,3 +208,99 @@ std::vector<Submission> UnoState::legalSubmissions() const {
   }
   return result;
 };
+
+std::string UnoState::toString() const {
+  std::string result{};
+
+  result += "山札\n";
+  result += "  ";
+  for (const Card card : deck_) {
+    result += card.toString() + " ";
+  }
+  result += "\n";
+  result += "\n";
+
+  result += "捨札\n";
+  result += "  ";
+  for (const Card card : discards_) {
+    result += card.toString() + " ";
+  }
+  result += "\n";
+  result += "\n";
+
+  result += "プレイヤの手札\n";
+  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+    result += "  ";
+    for (const Card card : player_cards_.at(i)) {
+      result += card.toString() + " ";
+    }
+    result += "\n";
+  }
+  result += "\n";
+
+  result += "プレイヤの席\n";
+  result += "  ";
+  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+    result += std::to_string(player_seats_.at(i)) + " ";
+  }
+  result += "\n";
+  result += "\n";
+
+  result += "プレイヤの得点\n";
+  result += "  ";
+  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+    result += std::to_string(player_scores_.at(i)) + " ";
+  }
+  result += "\n";
+  result += "\n";
+
+  result += "着手の型\n";
+  result += "  ";
+  result += moveType2String(current_move_type_);
+  result += "\n";
+  result += "\n";
+
+  result += "前のプレイヤ\n";
+  result += "  ";
+  result += std::to_string(prev_player_);
+  result += "\n";
+  result += "\n";
+
+  result += "現在のプレイヤ\n";
+  result += "  ";
+  result += std::to_string(current_player_);
+  result += "\n";
+  result += "\n";
+
+  result += "正順？\n";
+  result += "  ";
+  result += std::to_string(is_normal_order_);
+  result += "\n";
+  result += "\n";
+
+  result += "場の色\n";
+  result += "  ";
+  result += color2String(table_color_);
+  result += "\n";
+  result += "\n";
+
+  result += "場の模様\n";
+  result += "  ";
+  result += cardPattern2String(table_pattern_);
+  result += "\n";
+  result += "\n";
+
+  result += "チャレンジが成功する？\n";
+  result += "  ";
+  result += std::to_string(is_challenge_valid_);
+  result += "\n";
+  result += "\n";
+
+  result += "直前にプレイヤが引いたカード\n";
+  result += "  ";
+  result += drawn_card_.toString();
+  result += "\n";
+  result += "\n";
+
+  return result;
+}

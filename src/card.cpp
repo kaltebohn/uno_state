@@ -1,5 +1,84 @@
 #include "card.hpp"
 
+std::string color2String(const Color& color) {
+  switch (color) {
+    case Color::kBlue:
+      return "青";
+    case Color::kGreen:
+      return "緑";
+    case Color::kRed:
+      return "赤";
+    case Color::kYellow:
+      return "黄";
+    case Color::kWild:
+      return "ワイルド";
+    case Color::kNull:
+      return "空の色";
+    default:
+      return "不適切な色";
+  }
+}
+
+std::string cardNumber2String(const CardNumber card_number) {
+  switch (card_number) {
+    case CardNumber::kZero:
+      return "0";
+    case CardNumber::kOne:
+      return "1";
+    case CardNumber::kTwo:
+      return "2";
+    case CardNumber::kThree:
+      return "3";
+    case CardNumber::kFour:
+      return "4";
+    case CardNumber::kFive:
+      return "5";
+    case CardNumber::kSix:
+      return "6";
+    case CardNumber::kSeven:
+      return "7";
+    case CardNumber::kEight:
+      return "8";
+    case CardNumber::kNine:
+      return "9";
+    default:
+      return "不適切な数字";
+  }
+}
+
+std::string cardAction2String(const CardAction card_action) {
+  switch (card_action) {
+    case CardAction::kDrawTwo:
+      return "ドロー2";
+    case CardAction::kReverse:
+      return "リバース";
+    case CardAction::kSkip:
+      return "スキップ";
+    case CardAction::kWild:
+      return "ワイルド";
+    case CardAction::kWildDraw4:
+      return "ワイルドドロー4";
+    case CardAction::kWildShuffleHands:
+      return "シャッフルワイルド";
+    case CardAction::kWildCustomizable:
+      return "白いワイルド";
+    default:
+      return "不適切な記号";
+  }
+}
+
+std::string cardPattern2String(const CardPattern card_pattern) {
+  if (card_pattern.valueless_by_exception()) {
+    return "空の模様";
+  } else if (std::holds_alternative<CardNumber>(card_pattern)) {
+    return cardNumber2String(std::get<CardNumber>(card_pattern));
+  } else if (std::holds_alternative<CardAction>(card_pattern)) {
+    return cardAction2String(std::get<CardAction>(card_pattern));
+  } else {
+    return "不適切な模様";
+  }
+}
+
 const Card Card::kBlueZero         = Card(Color::kBlue,   (CardPattern)(CardNumber::kZero));
 const Card Card::kBlueOne          = Card(Color::kBlue,   (CardPattern)(CardNumber::kOne));
 const Card Card::kBlueTwo          = Card(Color::kBlue,   (CardPattern)(CardNumber::kTwo));

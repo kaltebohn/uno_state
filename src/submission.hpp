@@ -6,6 +6,11 @@
 /* 提出されるカードをラップしたクラス。 */
 class Submission {
  public:
+  friend std::ostream& operator<<(std::ostream& os, const Submission& src) {
+    os << src.toString();
+    return os;
+  }
+
   Submission(Card c, bool s) : card_(c), should_yell_UNO_(s) {}
 
   constexpr Card getCard() const { return card_; }
@@ -23,6 +28,10 @@ class Submission {
   }
 
   constexpr bool operator !=(const Submission& submission) const { return *this == submission; }
+
+  std::string toString() const {
+    return card_.toString() + ", UNOコール" + (should_yell_UNO_ ? "有" : "無");
+  }
 
  private:
   Card card_{};

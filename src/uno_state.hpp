@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iterator>
 #include <random>
+#include <string>
 #include <vector>
 
 #include "card.hpp"
@@ -20,8 +21,15 @@ enum class MoveType {
   kChallenge
 };
 
+std::string moveType2String(const MoveType move_type);
+
 class UnoState {
  public:
+  friend std::ostream& operator<<(std::ostream& os, const UnoState& src) {
+    os << src.toString();
+    return os;
+  }
+
   /* ゲーム開始用。 */
   UnoState(const Cards& first_deck, Card first_table_card = {})
       : deck_(first_deck),
@@ -156,9 +164,11 @@ class UnoState {
     return true;
   }
 
+  std::string toString() const;
+
  private:
-  std::vector<Card> deck_;
-  std::vector<Card> discards_;
+  Cards deck_;
+  Cards discards_;
   std::array<Cards, UnoConsts::kNumOfPlayers> player_cards_; // プレイヤ番号で各プレイヤの手札にアクセス。
   std::array<int, UnoConsts::kNumOfPlayers> player_seats_; // プレイヤ番号で各プレイヤの席にアクセス。
   std::array<int, UnoConsts::kNumOfPlayers> player_scores_; // プレイヤ番号で各プレイヤの得点にアクセス(ゲーム終了時以外は0)。
