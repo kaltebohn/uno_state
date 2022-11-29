@@ -2,6 +2,10 @@
 
 #include "../../src/card.hpp"
 
+TEST(AllCardsTest, NumOfAllCards) {
+  EXPECT_EQ(allCards().size(), 112);
+}
+
 TEST(GetColorTest, NormalColor) {
   Card card1{Color::kBlue, CardNumber::kZero};
   EXPECT_EQ(card1.getColor(), Color::kBlue);

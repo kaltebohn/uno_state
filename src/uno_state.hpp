@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <iostream>
 #include <iterator>
 #include <random>
@@ -189,6 +190,8 @@ class UnoState {
 
   UnoState nextWhenColorChoice(const Color color) const;
 
+  UnoState nextWhenIlligalColorChoice() const;
+
   UnoState nextWhenChallenge(const ChallengeFlag will_challenge) const;
 
   UnoState nextWhenSubmission(const Submission& submission) const;
@@ -205,6 +208,7 @@ class UnoState {
     state.current_move_type_ = MoveType::kSubmission;
     state.giveCards(next_player, 2);
     state.current_player_ = nextPlayerOf(next_player); // 次の人を飛ばす。
+    state.prev_player_ = current_player_;
     return state;
   }
 
@@ -213,6 +217,7 @@ class UnoState {
     state.current_move_type_ = MoveType::kSubmission;
     state.is_normal_order_ = !is_normal_order_;
     state.current_player_ = state.nextPlayer();
+    state.prev_player_ = current_player_;
     return state;
   }
 
@@ -221,6 +226,7 @@ class UnoState {
     const int current_player{current_player_};
     state.current_move_type_ = MoveType::kSubmission;
     state.current_player_ = nextPlayerOf(nextPlayerOf(current_player));
+    state.prev_player_ = current_player_;
     return state;
   }
 
@@ -228,6 +234,7 @@ class UnoState {
   UnoState nextWhenWildSubmission(UnoState& state) const {
     state.current_move_type_ = MoveType::kColorChoice;
     state.current_player_ = nextPlayer();
+    state.prev_player_ = current_player_;
     return state;
   }
 
@@ -241,11 +248,15 @@ class UnoState {
   UnoState nextWhenWildDraw4Submission(UnoState& state) const {
     state.current_move_type_ = MoveType::kColorChoice;
     state.current_player_ = nextPlayer();
+    state.prev_player_ = current_player_;
     const auto legal_moves = legalMoves();
     state.is_challenge_valid_ = (std::any_of(legal_moves.begin(), legal_moves.end(),
         [](Move move) {
-          const CardPattern pattern = std::get<Submission>(move).getCard().getPattern();
-          return std::get<CardAction>(pattern) != CardAction::kWildDraw4;
+          const Card card = std::get<Submission>(move).getCard();
+          const CardPattern pattern = card.getPattern();
+          return (!card.isEmpty() &&
+                  !std::holds_alternative<CardNumber>(pattern)) &&
+                  (std::get<CardAction>(pattern) != CardAction::kWildDraw4);
         }));
     return state;
   }
@@ -255,8 +266,14 @@ class UnoState {
     const int next_player = nextPlayer();
     state.current_move_type_ = MoveType::kColorChoice;
     state.current_player_ = next_player;
+    state.prev_player_ = current_player_;
 
-    std::vector<Card> collected_cards;
+    const int num_of_all_player_cards =
+        std::accumulate(state.player_cards_.begin(), state.player_cards_.end(), 0,
+            [](const int acc, const Cards& player_cards) {
+              return acc + player_cards.size();
+            });
+    std::vector<Card> collected_cards(num_of_all_player_cards);
     for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
       std::copy(state.player_cards_.at(i).begin(), state.player_cards_.at(i).end(), collected_cards.begin());
       state.player_cards_.at(i).clear();
@@ -273,10 +290,36 @@ class UnoState {
 
   void acceptSubmission(const Submission& submission);
 
+  void scoreToPlayers() {
+    if (!isFinished()) { return; }
+    /* カードが残っているプレイヤから減点。 */
+    int finished_player{-1};
+    int sum_of_scores{};
+    for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+      /* 上がったプレイヤには減点しない。次の処理のために番号を控えておく。 */
+      if (player_cards_.at(i).size() == 0) {
+        finished_player = i;
+        continue;
+      }
+
+      int const score{std::accumulate(player_cards_.at(i).begin(), player_cards_.at(i).end(), 0,
+          [](const int acc, const Card& card) {
+            return acc + card.toScore();
+          })};
+      player_scores_.at(i) = -score;
+      sum_of_scores += score;
+    }
+
+    /* 各プレイヤの減点分を上がったプレイヤに加算。 */
+    assert(finished_player != -1);
+    player_scores_.at(finished_player) = sum_of_scores;
+  }
+
   int nextPlayerOf(const int player_num) const {
-    const auto iter = is_normal_order_ ?
-        std::find(player_seats_.begin(), player_seats_.end(), player_seats_.at(player_num) + 1) :
-        std::find(player_seats_.begin(), player_seats_.end(), player_seats_.at(player_num) - 1);
+    const int next_seat = is_normal_order_ ?
+        (player_seats_.at(player_num) + 1) % UnoConsts::kNumOfPlayers :
+        (player_seats_.at(player_num) - 1 + UnoConsts::kNumOfPlayers) % UnoConsts::kNumOfPlayers;
+    const auto iter = std::find(player_seats_.begin(), player_seats_.end(), next_seat);
     return *iter;
   }
 
