@@ -124,10 +124,10 @@ class UnoState {
   UnoState next(Move move) const;
 
   /* 合法着手の全体を返す。 */
-  std::vector<Move> legalMoves() const;
+  virtual std::vector<Move> legalMoves() const;
 
   /* ゲームが終了しているか？ */
-  bool isFinished() const {
+  virtual bool isFinished() const {
     return std::any_of(player_cards_.cbegin(), player_cards_.cend(),
         [](Cards cards){ return cards.size() == 0; });
   }
@@ -145,7 +145,7 @@ class UnoState {
   MoveType getCurrentMoveType() const { return current_move_type_; }
 
   /* テスト用。 */
-  bool operator ==(const UnoState& state) const {
+  virtual bool operator ==(const UnoState& state) const {
     if (!std::equal(state.deck_.cbegin(), state.deck_.cend(), deck_.begin())) { return false; }
     if (!std::equal(state.discards_.cbegin(), state.discards_.cend(), discards_.begin())) { return false; }         
     for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
@@ -165,9 +165,9 @@ class UnoState {
     return true;
   }
 
-  std::string toString() const;
+  virtual std::string toString() const;
 
- private:
+ protected:
   Cards deck_;
   Cards discards_;
   std::array<Cards, UnoConsts::kNumOfPlayers> player_cards_; // プレイヤ番号で各プレイヤの手札にアクセス。
@@ -183,10 +183,10 @@ class UnoState {
   Card drawn_card_; // 直前にプレイヤが引いたカード。
 
   /* 可能な提出カードの全体を返す。 */
-  std::vector<Submission> legalSubmissions() const;
+  virtual std::vector<Submission> legalSubmissions() const;
 
   /* 現在のプレイヤがUNOを宣言すべきか(プレイヤの手札枚数が2枚か)？ */
-  bool currentPlayerShouldYellUNO() const { return player_cards_.at(current_player_).size() == 2; }
+  virtual bool currentPlayerShouldYellUNO() const { return player_cards_.at(current_player_).size() == 2; }
 
   UnoState nextWhenColorChoice(UnoState& state, const Color color) const;
 
@@ -288,9 +288,9 @@ class UnoState {
     return state;
   }
 
-  void acceptSubmission(const Submission& submission);
+  virtual void acceptSubmission(const Submission& submission);
 
-  void scoreToPlayers() {
+  virtual void scoreToPlayers() {
     if (!isFinished()) { return; }
     /* カードが残っているプレイヤから減点。 */
     int finished_player{-1};
@@ -315,7 +315,7 @@ class UnoState {
     player_scores_.at(finished_player) = sum_of_scores;
   }
 
-  int nextPlayerOf(const int player_num) const {
+  virtual int nextPlayerOf(const int player_num) const {
     const int next_seat = is_normal_order_ ?
         (player_seats_.at(player_num) + 1) % UnoConsts::kNumOfPlayers :
         (player_seats_.at(player_num) - 1 + UnoConsts::kNumOfPlayers) % UnoConsts::kNumOfPlayers;
@@ -325,7 +325,7 @@ class UnoState {
 
   int nextPlayer() const { return nextPlayerOf(current_player_); }
 
-  void giveCards(const int player_number, const int num) {
+  virtual void giveCards(const int player_number, const int num) {
     for (int i = 0; i < num; i++) {
       if (deck_.size() == 0) { refreshDeck(); }
       const Card card = deck_.back(); deck_.pop_back();
