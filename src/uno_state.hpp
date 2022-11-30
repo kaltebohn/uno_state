@@ -239,9 +239,9 @@ class UnoState {
   }
 
   /* 共通処理を実施した状態に、白いワイルドの効果を反映させる。 */
+  /* 効果が特定のモノに定まっていないので、効果ごとにクラスを作り、このクラスをラップさせる。 */
   UnoState nextWhenWildCustomizableSubmission(UnoState& state) const {
-    // TODO
-    return state;
+    assert(false);
   }
 
   /* 共通処理を実施した状態に、ワイルドドロー4の効果を反映させる。 */
