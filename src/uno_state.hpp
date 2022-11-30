@@ -188,19 +188,19 @@ class UnoState {
   /* 現在のプレイヤがUNOを宣言すべきか(プレイヤの手札枚数が2枚か)？ */
   bool currentPlayerShouldYellUNO() const { return player_cards_.at(current_player_).size() == 2; }
 
-  UnoState nextWhenColorChoice(const Color color) const;
+  UnoState nextWhenColorChoice(UnoState& state, const Color color) const;
 
-  UnoState nextWhenIlligalColorChoice() const;
+  UnoState nextWhenIlligalColorChoice(UnoState& state) const;
 
-  UnoState nextWhenChallenge(const ChallengeFlag will_challenge) const;
+  UnoState nextWhenChallenge(UnoState& state, const ChallengeFlag will_challenge) const;
 
-  UnoState nextWhenSubmission(const Submission& submission) const;
+  UnoState nextWhenSubmission(UnoState& state, const Submission& submission) const;
 
   /* 合法手でなければ2枚引かせて手番を飛ばす。 */
-  UnoState nextWhenIlligalSubmission() const;
+  UnoState nextWhenIlligalSubmission(UnoState& state) const;
 
   /* カードが空なら、カードを引こうとしているとみなす。 */
-  UnoState nextWhenEmptyCardSubmission() const;
+  UnoState nextWhenEmptyCardSubmission(UnoState& state) const;
 
   /* 共通処理を実施した状態に、ドロー2の効果を反映させる。 */
   UnoState nextWhenDrawTwoSubmission(UnoState& state) const {

@@ -19,201 +19,195 @@ UnoState UnoState::next(Move move) const {
   /* 既に上がっていたら状態遷移しない。 */
   if (isFinished()) { return *this; }
 
+  /* 自分のコピー。こいつの状態をどんどん書き換えて次状態にし、返す。 */
+  UnoState state{*this};
+
   /* カードの効果に関する処理はすべてkSubmissionのときに行う。 */
   /* 他のイベントでは、着手への対応と現在プレイヤの変更だけする。 */
   if (current_move_type_ == MoveType::kColorChoice) {
-    return nextWhenColorChoice(std::get<Color>(move));
+    return nextWhenColorChoice(state, std::get<Color>(move));
   }
 
   if (current_move_type_ == MoveType::kChallenge) {
-    return nextWhenChallenge(std::get<ChallengeFlag>(move));
+    return nextWhenChallenge(state, std::get<ChallengeFlag>(move));
   }
 
   if (current_move_type_ == MoveType::kSubmissionOfDrawnCard) {
-    UnoState next_state{*this};
-    next_state.drawn_card_ = Card{};
+    state.drawn_card_ = Card{}; // drawn_card_をチャラにする。
     Submission submission = std::get<Submission>(move);
     Card card = submission.getCard();
 
     if (card.isEmpty()) {
-      next_state.current_move_type_ = MoveType::kSubmission;
-      next_state.prev_player_ = current_player_;
-      next_state.current_player_ = nextPlayer();
-      return next_state;
+      state.current_move_type_ = MoveType::kSubmission;
+      state.prev_player_ = current_player_;
+      state.current_player_ = nextPlayer();
+      return state;
     } else {
       if (card != drawn_card_ || !submission.isLegal(table_color_, table_pattern_)) {
         /* 着手が違法なら、ペナルティとして2枚カードを引く。 */
-        next_state.giveCards(current_player_, 2);
-        next_state.current_move_type_ = MoveType::kSubmission;
-        next_state.prev_player_ = current_player_;
-        next_state.current_player_ = nextPlayer();
-        return next_state;
+        state.giveCards(current_player_, 2);
+        state.current_move_type_ = MoveType::kSubmission;
+        state.prev_player_ = current_player_;
+        state.current_player_ = nextPlayer();
+        return state;
       } else {
-        return nextWhenSubmission(std::get<Submission>(move));
+        return nextWhenSubmission(state, std::get<Submission>(move));
       }
     }
   }
 
   /* 以下カード提出の場合。 */
-  return nextWhenSubmission(std::get<Submission>(move));
+  return nextWhenSubmission(state, std::get<Submission>(move));
 }
 
-UnoState UnoState::nextWhenColorChoice(const Color color) const {
+UnoState UnoState::nextWhenColorChoice(UnoState& state, const Color color) const {
   /* 青緑赤黄以外は選べない。 */
   if (!(color == Color::kBlue || color == Color::kGreen || color == Color::kRed || color == Color::kYellow)) {
-    return nextWhenIlligalColorChoice();
+    return nextWhenIlligalColorChoice(state);
   }
 
-  UnoState next_state{*this};
-  next_state.table_color_ = color;
-  next_state.prev_player_ = current_player_;
-  next_state.current_player_ = nextPlayer();
+  state.table_color_ = color;
+  state.prev_player_ = current_player_;
+  state.current_player_ = nextPlayer();
 
   /* ワイルドドロー4の場合、色選択後にチャレンジが発生する。 */
   if (std::get<CardAction>(table_pattern_) == CardAction::kWildDraw4) {
-    next_state.current_move_type_ = MoveType::kChallenge;
+    state.current_move_type_ = MoveType::kChallenge;
   } else {
-    next_state.current_move_type_ = MoveType::kSubmission;
+    state.current_move_type_ = MoveType::kSubmission;
   }
-  return next_state;
+  return state;
 }
 
-UnoState UnoState::nextWhenIlligalColorChoice() const {
+UnoState UnoState::nextWhenIlligalColorChoice(UnoState& state) const {
   const int current_player{current_player_};
-  UnoState next_state{*this};
 
   /* 前のプレイヤが最後に出したカード(ワイルドカード)を手札に戻す。 */
-  next_state.player_cards_.at(current_player).push_back(next_state.discards_.back()); next_state.discards_.pop_back();
+  state.player_cards_.at(current_player).push_back(state.discards_.back()); state.discards_.pop_back();
 
   /* 場をカードが出される前に戻す。 */
-  next_state.table_color_ = next_state.discards_.back().getColor();
-  next_state.table_pattern_ = next_state.discards_.back().getPattern();
+  state.table_color_ = state.discards_.back().getColor();
+  state.table_pattern_ = state.discards_.back().getPattern();
 
   /* ペナルティを課す。 */
-  next_state.giveCards(current_player_, 2);
+  state.giveCards(current_player_, 2);
 
   /* 手番を飛ばす。 */
-  next_state.current_move_type_ = MoveType::kSubmission;
-  next_state.current_player_ = nextPlayer();
-  next_state.prev_player_ = current_player;
+  state.current_move_type_ = MoveType::kSubmission;
+  state.current_player_ = nextPlayer();
+  state.prev_player_ = current_player;
 
-  return next_state;
+  return state;
 }
 
-UnoState UnoState::nextWhenChallenge(const ChallengeFlag will_challenge) const {
-  UnoState next_state{*this};
-
+UnoState UnoState::nextWhenChallenge(UnoState& state, const ChallengeFlag will_challenge) const {
   const int challenging_player = current_player_;
   const int challenged_player = prev_player_;
 
   /* チャレンジ後は必ずカード提出。 */
-  next_state.current_move_type_ = MoveType::kSubmission;
+  state.current_move_type_ = MoveType::kSubmission;
 
   /* チャレンジしなかった場合、今のプレイヤに4枚引かせる。 */
   if (!will_challenge) {
-    next_state.is_challenge_valid_ = false; // フラグを戻す。
+    state.is_challenge_valid_ = false; // フラグを戻す。
 
     /* 次のプレイヤに手番を移す。 */
-    next_state.prev_player_ = challenging_player;
-    next_state.current_player_ = nextPlayerOf(challenging_player);
+    state.prev_player_ = challenging_player;
+    state.current_player_ = nextPlayerOf(challenging_player);
 
-    next_state.giveCards(challenging_player, 4);
+    state.giveCards(challenging_player, 4);
 
-    return next_state;
+    return state;
   }
 
   /* チャレンジが成功した場合、前のプレイヤが出したカードを戻し、4枚引かせ、手番を戻す。 */
   if (is_challenge_valid_) {
-    next_state.is_challenge_valid_ = false; // フラグを戻す。
+    state.is_challenge_valid_ = false; // フラグを戻す。
 
     /* 前のプレイヤのターンに戻す。 */
-    next_state.current_player_ = challenged_player;
-    next_state.prev_player_ = challenging_player;
+    state.current_player_ = challenged_player;
+    state.prev_player_ = challenging_player;
 
     /* 前のプレイヤが最後に出したカード(ワイルドカード)を手札に戻す。 */
-    next_state.player_cards_.at(challenged_player).push_back(next_state.discards_.back()); next_state.discards_.pop_back();
+    state.player_cards_.at(challenged_player).push_back(state.discards_.back()); state.discards_.pop_back();
 
     /* 場をカードが出される前に戻す。 */
-    next_state.table_color_ = next_state.discards_.back().getColor();
-    next_state.table_pattern_ = next_state.discards_.back().getPattern();
+    state.table_color_ = state.discards_.back().getColor();
+    state.table_pattern_ = state.discards_.back().getPattern();
 
     /* 前のプレイヤに手札を4枚引かせる。 */
-    next_state.giveCards(challenged_player, 4);
+    state.giveCards(challenged_player, 4);
     // TODO: ALGORIに合わせるなら、must_play_card_validみたいなフラグがいる。
-    return next_state;
+    return state;
   }
 
   /* チャレンジが失敗した場合、今のプレイヤに6枚引かせる。 */
-  next_state.giveCards(challenging_player, 6);
+  state.giveCards(challenging_player, 6);
 
   /* 次のプレイヤに手番を移す。 */
-  next_state.prev_player_ = challenging_player;
-  next_state.current_player_ = nextPlayerOf(challenging_player);
+  state.prev_player_ = challenging_player;
+  state.current_player_ = nextPlayerOf(challenging_player);
 
-  return next_state;
+  return state;
 }
 
-UnoState UnoState::nextWhenSubmission(const Submission& submission) const {
-  UnoState next_state{*this};
-  next_state.drawn_card_ = Card{}; // 行儀悪いけど、カードを引いて出した場合のためにここでdrawn_card_をリセットする。
+UnoState UnoState::nextWhenSubmission(UnoState&state, const Submission& submission) const {
   const Card card = submission.getCard();
 
   if (!submission.isLegal(table_color_, table_pattern_)) {
-    return nextWhenIlligalSubmission();
+    return nextWhenIlligalSubmission(state);
   }
 
   if (submission.getCard().isEmpty()) {
-    return nextWhenEmptyCardSubmission();
+    return nextWhenEmptyCardSubmission(state);
   }
 
   /* カードを場に出す。 */
-  next_state.acceptSubmission(submission);
+  state.acceptSubmission(submission);
 
   /* 記号カードでなければここで終わり。 */
   if (!std::holds_alternative<CardAction>(card.getPattern())) {
-    next_state.current_move_type_ = MoveType::kSubmission;
-    next_state.current_player_ = nextPlayer();
-    next_state.prev_player_ = current_player_;
-    return next_state;
+    state.current_move_type_ = MoveType::kSubmission;
+    state.current_player_ = nextPlayer();
+    state.prev_player_ = current_player_;
+    return state;
   }
 
   const CardAction submission_action = std::get<CardAction>(card.getPattern());
   if (submission_action == CardAction::kDrawTwo) {
-    return nextWhenDrawTwoSubmission(next_state);
+    return nextWhenDrawTwoSubmission(state);
   } else if (submission_action == CardAction::kReverse) {
-    return nextWhenReverseSubmission(next_state);
+    return nextWhenReverseSubmission(state);
   } else if (submission_action == CardAction::kSkip) {
-    return nextWhenSkipSubmission(next_state);
+    return nextWhenSkipSubmission(state);
   } else if (submission_action == CardAction::kWild) {
-    return nextWhenWildSubmission(next_state);
+    return nextWhenWildSubmission(state);
   } else if (submission_action == CardAction::kWildCustomizable) {
-    return nextWhenWildCustomizableSubmission(next_state);
+    return nextWhenWildCustomizableSubmission(state);
   } else if (submission_action == CardAction::kWildDraw4) {
-    return nextWhenWildDraw4Submission(next_state);
+    return nextWhenWildDraw4Submission(state);
   } else if (submission_action == CardAction::kWildShuffleHands) {
-    return nextWhenWildShuffleHandsSubmission(next_state);
+    return nextWhenWildShuffleHandsSubmission(state);
   }
 
   assert(false);
 }
 
-UnoState UnoState::nextWhenIlligalSubmission() const {
+UnoState UnoState::nextWhenIlligalSubmission(UnoState& state) const {
   const int current_player{current_player_};
-  UnoState next_state{*this};
-  next_state.current_move_type_ = MoveType::kSubmission;
-  next_state.giveCards(current_player_, 2);
-  next_state.current_player_ = nextPlayer();
-  next_state.prev_player_ = current_player;
-  return next_state;
+  state.current_move_type_ = MoveType::kSubmission;
+  state.giveCards(current_player_, 2);
+  state.current_player_ = nextPlayer();
+  state.prev_player_ = current_player;
+  return state;
 }
 
-UnoState UnoState::nextWhenEmptyCardSubmission() const {
+UnoState UnoState::nextWhenEmptyCardSubmission(UnoState& state) const {
   const int current_player{current_player_};
-  UnoState next_state{*this};
-  next_state.current_move_type_ = MoveType::kSubmissionOfDrawnCard;
-  next_state.giveCards(current_player, 1);
-  next_state.drawn_card_ = next_state.player_cards_.at(current_player).back();
-  return next_state;
+  state.current_move_type_ = MoveType::kSubmissionOfDrawnCard;
+  state.giveCards(current_player, 1);
+  state.drawn_card_ = state.player_cards_.at(current_player).back();
+  return state;
 }
 
 /* 合法手submissionを現在のプレイヤが出した場合の、カードの効果以外の処理を行う。 */
