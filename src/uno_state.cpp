@@ -71,7 +71,7 @@ UnoState UnoState::nextWhenColorChoice(UnoState& state, const Color color) const
   state.current_player_ = nextPlayer();
 
   /* ワイルドドロー4の場合、色選択後にチャレンジが発生する。 */
-  if (std::get<CardAction>(table_pattern_) == CardAction::kWildDraw4) {
+  if (std::holds_alternative<CardAction>(table_pattern_) && std::get<CardAction>(table_pattern_) == CardAction::kWildDraw4) {
     state.current_move_type_ = MoveType::kChallenge;
   } else {
     state.current_move_type_ = MoveType::kSubmission;

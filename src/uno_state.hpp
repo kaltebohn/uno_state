@@ -37,6 +37,7 @@ class UnoState {
         discards_(),
         player_cards_(),
         player_seats_({0, 1, 2, 3}),
+        player_scores_(),
         current_move_type_(MoveType::kSubmission),
         prev_player_(-1),
         current_player_(-1),
@@ -50,7 +51,7 @@ class UnoState {
     
     /* プレイヤにカードを7枚ずつ分配。 */
     for (int player_num = 0; player_num < UnoConsts::kNumOfPlayers; player_num++) {
-      std::copy(deck_.begin(), deck_.begin() + 7, player_cards_.at(player_num).begin());
+      std::copy(deck_.begin(), deck_.begin() + 7, std::back_inserter(player_cards_.at(player_num)));
       deck_.erase(deck_.begin(), deck_.begin() + 7);
     }
 
@@ -78,7 +79,7 @@ class UnoState {
     table_pattern_ =first_table_card.getPattern();
 
     /* 始点のプレイヤを決定。 */
-    int const first_player = *std::find(player_seats_.begin(), player_seats_.end(), 1);
+    int const first_player = *std::find(player_seats_.begin(), player_seats_.end(), 0);
 
     /* 最初の1枚の効果を反映させる。 */
     if (!std::holds_alternative<CardAction>(first_table_card.getPattern())) {
@@ -268,14 +269,9 @@ class UnoState {
     state.current_player_ = next_player;
     state.prev_player_ = current_player_;
 
-    const int num_of_all_player_cards =
-        std::accumulate(state.player_cards_.begin(), state.player_cards_.end(), 0,
-            [](const int acc, const Cards& player_cards) {
-              return acc + player_cards.size();
-            });
-    std::vector<Card> collected_cards(num_of_all_player_cards);
+    std::vector<Card> collected_cards{};
     for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-      std::copy(state.player_cards_.at(i).begin(), state.player_cards_.at(i).end(), collected_cards.begin());
+      std::copy(state.player_cards_.at(i).begin(), state.player_cards_.at(i).end(), std::back_inserter(collected_cards));
       state.player_cards_.at(i).clear();
     }
     shuffleCards(collected_cards);
@@ -290,6 +286,7 @@ class UnoState {
 
   virtual void acceptSubmission(const Submission& submission);
 
+  // TODO: たまに正しく得点を付けられていない気がする。
   virtual void scoreToPlayers() {
     if (!isFinished()) { return; }
     /* カードが残っているプレイヤから減点。 */
@@ -320,7 +317,7 @@ class UnoState {
         (player_seats_.at(player_num) + 1) % UnoConsts::kNumOfPlayers :
         (player_seats_.at(player_num) - 1 + UnoConsts::kNumOfPlayers) % UnoConsts::kNumOfPlayers;
     const auto iter = std::find(player_seats_.begin(), player_seats_.end(), next_seat);
-    return *iter;
+    return std::distance(player_seats_.begin(), iter);
   }
 
   int nextPlayer() const { return nextPlayerOf(current_player_); }
@@ -333,7 +330,7 @@ class UnoState {
     }
   }
 
-  void shuffleCards(std::vector<Card> cards) const {
+  void shuffleCards(std::vector<Card>& cards) const {
     // TODO: xorshiftに置き換える。
     std::random_device seed_gen;
     std::mt19937 engine(seed_gen());
