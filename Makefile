@@ -39,4 +39,4 @@ $(TEST_OUTDIR)/uno_state_test:	$(TEST_SRCDIR)/uno_state_test.cpp $(OBJDIR)/uno_s
 	$(CC) $(TEST_CFLAGS) -o $@ $^
 
 clean:
-	rm -f ./out/obj/**/*.o ./out/obj/*.o ./test/out/card_test ./test/out/submission_test ./test/out/uno_state_test
+	rm -f ./out/obj/**/*.o ./out/obj/*.o ./out/main ./test/out/card_test ./test/out/submission_test ./test/out/uno_state_test

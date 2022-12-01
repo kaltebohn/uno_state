@@ -8,6 +8,10 @@ class UnoStateBind2 final : public UnoState {
  public:
   using UnoState::UnoState;
 
+  /* ゲーム開始用。 */
+  UnoStateBind2(const Cards& first_deck, Card first_table_card = {})
+      : UnoState::UnoState(first_deck, first_table_card) {}
+
   UnoStateBind2(const std::vector<Card> deck,
                 const std::vector<Card> discards,
                 const std::array<Cards, UnoConsts::kNumOfPlayers> player_cards,
@@ -38,7 +42,8 @@ class UnoStateBind2 final : public UnoState {
     /* 既に上がっていたら状態遷移しない。 */
     if (isFinished()) { return *this; }
 
-    if (std::get<Submission>(move).getCard() == Card::kWildCustomizable) {
+    if (std::holds_alternative<Submission>(move) &&
+        (std::get<Submission>(move).getCard() == Card::kWildCustomizable)) {
       const Submission submission{std::get<Submission>(move)};
       UnoStateBind2 state{*this};
       state.acceptSubmission(submission);
@@ -83,6 +88,8 @@ class UnoStateBind2 final : public UnoState {
     state.current_player_ = next_player;
     state.bound_player_ = next_player;
     state.bound_turn_ = 2;
+
+    return state;
   }
 };
 
