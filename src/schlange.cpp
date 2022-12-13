@@ -53,8 +53,7 @@ Submission Schlange::submitCard() const {
       scores.at(i) = -10000;
     } else if (std::holds_alternative<CardNumber>(card.getPattern())) {
       /* 数字カードなら、(書かれている数字)を評価値とする。 */
-      assert(std::holds_alternative<CardNumber>(card.getPattern()));
-      scores.at(i) = -cardNumber2Int(std::get<CardNumber>(card.getPattern()));
+      scores.at(i) = cardNumber2Int(std::get<CardNumber>(card.getPattern()));
     } else if (card.getColor() != Color::kWild) {
       /* ワイルド以外の記号カードなら、20点を評価値とする。 */
       scores.at(i) = 20;
