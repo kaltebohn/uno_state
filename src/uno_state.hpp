@@ -16,10 +16,10 @@
 #include "uno_consts.hpp"
 
 enum class MoveType {
-  kSubmission,
-  kSubmissionOfDrawnCard,
+  kChallenge,
   kColorChoice,
-  kChallenge
+  kSubmission,
+  kSubmissionOfDrawnCard
 };
 
 std::string moveType2String(const MoveType move_type);
@@ -144,6 +144,12 @@ class UnoState {
 
   /* 現時点で期待している着手の型を返す。 */
   MoveType getCurrentMoveType() const { return current_move_type_; }
+
+  Color getTableColor() const { return table_color_; }
+
+  CardPattern getTablePattern() const { return table_pattern_; }
+
+  Card getDrawnCard() const { return drawn_card_; }
 
   /* テスト用。 */
   virtual bool operator ==(const UnoState& state) const {

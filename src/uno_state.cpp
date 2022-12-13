@@ -18,7 +18,6 @@ std::string moveType2String(const MoveType move_type) {
 UnoState UnoState::next(Move move) const {
   /* 既に上がっていたら状態遷移しない。 */
   if (isFinished()) { return *this; }
-
   /* 自分のコピー。こいつの状態をどんどん書き換えて次状態にし、返す。 */
   UnoState state{*this};
 
@@ -57,6 +56,7 @@ UnoState UnoState::next(Move move) const {
   }
 
   /* 以下カード提出の場合。 */
+  assert(std::holds_alternative<Submission>(move));
   return nextWhenSubmission(state, std::get<Submission>(move));
 }
 

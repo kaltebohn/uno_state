@@ -11,6 +11,8 @@ class Submission {
     return os;
   }
 
+  Submission() : card_(), should_yell_UNO_(false) {}
+
   Submission(Card c, bool s) : card_(c), should_yell_UNO_(s) {}
 
   constexpr Card getCard() const { return card_; }
