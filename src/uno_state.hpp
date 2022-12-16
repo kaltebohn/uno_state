@@ -8,6 +8,7 @@
 #include <iterator>
 #include <random>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "card.hpp"
