@@ -66,9 +66,9 @@ class UnoState {
     /* ワイルドドロー4、シャッフルワイルド、白いワイルドの場合は仕切り直し。 */
     while (first_table_card.isEmpty()) {
       const Card tmp_card{deck_.back()};
-      if (!(tmp_card == Card(Color::kWild, CardAction::kWildDraw4) ||
-            tmp_card == Card(Color::kWild, CardAction::kWildShuffleHands) ||
-            tmp_card == Card(Color::kWild, CardAction::kWildCustomizable))) {
+      if (!(tmp_card == Card::kWildDraw4 ||
+            tmp_card == Card::kWildShuffleHands ||
+            tmp_card == Card::kWildCustomizable)) {
         deck_.pop_back();
         first_table_card = tmp_card;
       } else {
@@ -83,25 +83,33 @@ class UnoState {
     int const first_player = *std::find(player_seats_.begin(), player_seats_.end(), 0);
 
     /* 最初の1枚の効果を反映させる。 */
-    if (!std::holds_alternative<CardAction>(first_table_card.getPattern())) {
+    if (std::holds_alternative<CardNumber>(first_table_card.getPattern())) {
+      /* 数字カードなら場に置くだけ。 */
       current_move_type_ = MoveType::kSubmission;
       current_player_ = first_player;
     } else {
+      /* 効果ありカード毎の処理。 */
       const CardAction submission_action = std::get<CardAction>(first_table_card.getPattern());
       if (submission_action == CardAction::kDrawTwo) {
+        /* ドロー2: 最初のプレイヤがカードを2枚引き、次のプレイヤに手番が移る。 */
         current_move_type_ = MoveType::kSubmission;
         giveCards(first_player, 2);
         current_player_ = nextPlayerOf(first_player);
       } else if (submission_action == CardAction::kReverse) {
+        /* リバース: 手番が逆順になり、本来最後の手番だったプレイヤが最初にカードを出す。 */
         current_move_type_ = MoveType::kSubmission;
         is_normal_order_ = !is_normal_order_;
         current_player_ = nextPlayerOf(first_player);
       } else if (submission_action == CardAction::kSkip) {
+        /* スキップ: 最初のプレイヤーは手番を飛ばされ、次のプレイヤに手番が移る。*/
         current_move_type_ = MoveType::kSubmission;
         current_player_ = nextPlayerOf(first_player);
       } else if (submission_action == CardAction::kWild) {
+        /* ワイルド: 最初のプレイヤが好きな色を宣言し、次のプレイヤからスタートする。*/
         current_move_type_ = MoveType::kColorChoice;
         current_player_ = first_player;
+      } else {
+        assert(false);
       }
     }
   }
