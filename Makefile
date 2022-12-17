@@ -38,5 +38,7 @@ $(TEST_OUTDIR)/submission_test:	$(TEST_SRCDIR)/submission_test.cpp $(OBJDIR)/car
 $(TEST_OUTDIR)/uno_state_test:	$(TEST_SRCDIR)/uno_state_test.cpp $(OBJDIR)/uno_state.o $(OBJDIR)/card.o
 	$(CC) $(TEST_CFLAGS) -o $@ $^
 
+$(TEST_OUTDIR)/uno_state_bind2_test:
+
 clean:
 	rm -f ./out/obj/**/*.o ./out/obj/*.o ./out/main ./test/out/card_test ./test/out/submission_test ./test/out/uno_state_test

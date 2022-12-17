@@ -11,6 +11,7 @@
 #include <variant>
 #include <vector>
 
+#include "external/xorshift64.hpp"
 #include "card.hpp"
 #include "submission.hpp"
 #include "move.hpp"
@@ -33,7 +34,7 @@ class UnoState {
   }
 
   /* ゲーム開始用。 */
-  UnoState(const Cards& first_deck, Card first_table_card = {})
+  UnoState(const Cards& first_deck, XorShift64::result_type random_seed = 0, Card first_table_card = {})
       : deck_(first_deck),
         discards_(),
         player_cards_(),
@@ -47,6 +48,14 @@ class UnoState {
         table_pattern_(),
         is_challenge_valid_(),
         drawn_card_() {
+    /* 乱数エンジンをセット。 */
+    if (random_seed == 0) {
+      std::random_device seed_gen;
+      random_engine_ = seed_gen();
+    } else {
+      random_engine_ = random_seed;
+    }
+
     /* 山札をシャッフル。 */
     refreshDeck();
     
@@ -57,10 +66,7 @@ class UnoState {
     }
 
     /* 席順をシャッフル。 */
-    // TODO: xorshiftに置き換える。
-    std::random_device seed_gen;
-    std::mt19937 engine(seed_gen());
-    std::shuffle(player_seats_.begin(), player_seats_.end(), engine);
+    std::shuffle(player_seats_.begin(), player_seats_.end(), random_engine_);
 
     /* 最初の1枚を出す。 */
     /* ワイルドドロー4、シャッフルワイルド、白いワイルドの場合は仕切り直し。 */
@@ -114,7 +120,21 @@ class UnoState {
     }
   }
 
-  UnoState(std::vector<Card> deck, std::vector<Card> discards, std::array<Cards, UnoConsts::kNumOfPlayers> player_cards, std::array<int, UnoConsts::kNumOfPlayers> player_seats, std::array<int, UnoConsts::kNumOfPlayers> player_scores, MoveType current_event, int prev_player, int current_player, bool is_normal_order, Color table_color, CardPattern table_pattern, bool is_challenge_valid, Card drawn_card)
+  UnoState(std::vector<Card> deck,
+           std::vector<Card> discards,
+           std::array<Cards,
+           UnoConsts::kNumOfPlayers> player_cards,
+           std::array<int, UnoConsts::kNumOfPlayers> player_seats,
+           std::array<int, UnoConsts::kNumOfPlayers> player_scores,
+           MoveType current_event,
+           int prev_player,
+           int current_player,
+           bool is_normal_order,
+           Color table_color,
+           CardPattern table_pattern,
+           bool is_challenge_valid,
+           Card drawn_card,
+           XorShift64 random_engine)
       : deck_(deck),
         discards_(discards),
         player_cards_(player_cards),
@@ -127,7 +147,8 @@ class UnoState {
         table_color_(table_color),
         table_pattern_(table_pattern),
         is_challenge_valid_(is_challenge_valid),
-        drawn_card_(drawn_card)
+        drawn_card_(drawn_card),
+        random_engine_(random_engine)
       {}
 
   /* 受け取った手を適用して得られる状態を返す。 */
@@ -197,6 +218,7 @@ class UnoState {
   CardPattern table_pattern_;
   bool is_challenge_valid_;
   Card drawn_card_; // 直前にプレイヤが引いたカード。
+  XorShift64 random_engine_;
 
   /* 可能な提出カードの全体を返す。 */
   virtual std::vector<Submission> legalSubmissions() const;
@@ -289,7 +311,7 @@ class UnoState {
       std::copy(state.player_cards_.at(i).begin(), state.player_cards_.at(i).end(), std::back_inserter(collected_cards));
       state.player_cards_.at(i).clear();
     }
-    shuffleCards(collected_cards);
+    state.shuffleCards(collected_cards);
 
     int player_to_give = next_player;
     for (const Card& card : collected_cards) {
@@ -350,11 +372,8 @@ class UnoState {
     }
   }
 
-  void shuffleCards(std::vector<Card>& cards) const {
-    // TODO: xorshiftに置き換える。
-    std::random_device seed_gen;
-    std::mt19937 engine(seed_gen());
-    std::shuffle(cards.begin(), cards.end(), engine);
+  void shuffleCards(std::vector<Card>& cards) {
+    std::shuffle(cards.begin(), cards.end(), random_engine_);
   }
 
   void refreshDeck() {

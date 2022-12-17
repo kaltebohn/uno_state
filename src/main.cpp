@@ -24,8 +24,9 @@ Move nextMoveOfPlayer(Schlange& player, const int player_num, const UnoStateBind
 int main(void) {
   std::array<Schlange, 4> players{};
   std::array<int, 4> sum_of_score{};
+  std::random_device seed_gen;
   for (int i = 0; i < 1000; i++) {
-    UnoStateBind2 state{allCards()};
+    UnoStateBind2 state{allCards(), seed_gen()};
     while (!state.isFinished()) {
       const int current_player{state.getCurrentPlayerNum()};
       Schlange& player{players.at(current_player)};

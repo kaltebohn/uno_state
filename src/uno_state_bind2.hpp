@@ -9,8 +9,8 @@ class UnoStateBind2 final : public UnoState {
   using UnoState::UnoState;
 
   /* ゲーム開始用。 */
-  UnoStateBind2(const Cards& first_deck, Card first_table_card = {})
-      : UnoState::UnoState(first_deck, first_table_card) {}
+  UnoStateBind2(const Cards& first_deck, XorShift64::result_type random_seed = 0, Card first_table_card = {})
+      : UnoState::UnoState(first_deck, random_seed, first_table_card) {}
 
   UnoStateBind2(const std::vector<Card> deck,
                 const std::vector<Card> discards,
@@ -25,9 +25,23 @@ class UnoStateBind2 final : public UnoState {
                 const CardPattern table_pattern,
                 const bool is_challenge_valid,
                 const Card drawn_card,
+                const XorShift64 random_engine,
                 const int bound_player,
                 const int bound_turn)
-      : UnoState::UnoState(deck, discards, player_cards, player_seats, player_scores, current_event, prev_player, current_player, is_normal_order, table_color, table_pattern, is_challenge_valid, drawn_card),
+      : UnoState::UnoState(deck,
+                           discards,
+                           player_cards,
+                           player_seats,
+                           player_scores,
+                           current_event,
+                           prev_player,
+                           current_player,
+                           is_normal_order,
+                           table_color,
+                           table_pattern,
+                           is_challenge_valid,
+                           drawn_card,
+                           random_engine),
         bound_player_(bound_player),
         bound_turn_(bound_turn)
       {}
