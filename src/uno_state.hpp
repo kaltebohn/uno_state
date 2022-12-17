@@ -340,6 +340,11 @@ class UnoState {
   virtual void giveCards(const int player_number, const int num) {
     for (int i = 0; i < num; i++) {
       if (deck_.size() == 0) { refreshDeck(); }
+
+      /* 捨て札も山札も0枚の場合、手札を捨てないプレイヤが存在する。 */
+      /* このクラスはそうしたプレイヤを許容する必要がないので、強制終了させる。 */
+      assert(deck_.size() > 0);
+
       const Card card = deck_.back(); deck_.pop_back();
       player_cards_.at(player_number).push_back(card);
     }
