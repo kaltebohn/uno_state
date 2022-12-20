@@ -168,29 +168,28 @@ class UnoState {
         [](Cards cards){ return cards.size() == 0; });
   }
 
-  /* 指定されたプレイヤ番号の現時点での得点を返す。ゲームが終わっていなければ0。 */
-  double getScore(const int player_num) const { return player_scores_.at(player_num); }
-
-  /* 現時点が誰の手番か？ */
-  int getCurrentPlayerNum() const { return current_player_; }
-
-  /* player_num番目のプレイヤの手札を返す。 */
+  Cards getDiscards() const { return discards_; }
   Cards getPlayerCards(int player_num) const { return player_cards_.at(player_num); }
-
-  /* 現時点で期待している着手の型を返す。 */
+  int getPlayerSeats(const int player_num) const { return player_seats_.at(player_num); }
+  double getScore(const int player_num) const { return player_scores_.at(player_num); }
   MoveType getCurrentMoveType() const { return current_move_type_; }
-
+  int getPrevPlayerNum() const { return prev_player_; }
+  int getCurrentPlayerNum() const { return current_player_; }
+  bool getIsNormalOrder() const { return is_normal_order_; }
   Color getTableColor() const { return table_color_; }
-
   CardPattern getTablePattern() const { return table_pattern_; }
-
-  bool getIsChallengeValid() const { return is_challenge_valid_; }
-
   Card getDrawnCard() const { return drawn_card_; }
-
   Cards getAddCards(const int player_num) const { return add_cards_.at(player_num); }
-
   Cards getSubCards(const int player_num) const { return sub_cards_.at(player_num); }
+
+  std::array<int, UnoConsts::kNumOfPlayers> getQuantityOfPlayerCards() const {
+    std::array<int, UnoConsts::kNumOfPlayers> result{};
+    std::transform(player_cards_.begin(), player_cards_.end(), result.begin(),
+        [](const Cards& cards) {
+          return cards.size();
+        });
+    return result;
+  }
 
   /* テスト用。 */
   virtual bool operator ==(const UnoState& state) const {

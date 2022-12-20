@@ -107,6 +107,9 @@ class UnoStateBind2 final : public UnoState {
     return state;
   }
 
+  int getBoundPlayer() const { return bound_player_; }
+  int getBoundTurn() const { return bound_turn_; }
+
  private:
   int bound_player_{-1};
   int bound_turn_{};
