@@ -18,8 +18,13 @@ std::string moveType2String(const MoveType move_type) {
 UnoState UnoState::next(Move move) const {
   /* 既に上がっていたら状態遷移しない。 */
   if (isFinished()) { return *this; }
+
   /* 自分のコピー。こいつの状態をどんどん書き換えて次状態にし、返す。 */
   UnoState state{*this};
+
+  /* 現状態に遷移する際発生した各プレイヤの手札の差分をリセット。 */
+  state.add_cards_.fill({});
+  state.sub_cards_.fill({});
 
   /* カードの効果に関する処理はすべてkSubmissionのときに行う。 */
   /* 他のイベントでは、着手への対応と現在プレイヤの変更だけする。 */
@@ -83,7 +88,7 @@ UnoState UnoState::nextWhenIlligalColorChoice(UnoState& state) const {
   const int current_player{current_player_};
 
   /* 前のプレイヤが最後に出したカード(ワイルドカード)を手札に戻す。 */
-  state.player_cards_.at(current_player).push_back(state.discards_.back()); state.discards_.pop_back();
+  state.returnCards(current_player, 1);
 
   /* 場をカードが出される前に戻す。 */
   state.table_color_ = state.discards_.back().getColor();
@@ -129,7 +134,7 @@ UnoState UnoState::nextWhenChallenge(UnoState& state, const ChallengeFlag will_c
     state.prev_player_ = challenging_player;
 
     /* 前のプレイヤが最後に出したカード(ワイルドカード)を手札に戻す。 */
-    state.player_cards_.at(challenged_player).push_back(state.discards_.back()); state.discards_.pop_back();
+    state.returnCards(challenged_player, 1);
 
     /* 場をカードが出される前に戻す。 */
     state.table_color_ = state.discards_.back().getColor();
@@ -214,13 +219,7 @@ UnoState UnoState::nextWhenEmptyCardSubmission(UnoState& state) const {
 void UnoState::acceptSubmission(const Submission& submission) {
   /* カードを場に出し、プレイヤの手札から除く。 */
   const Card card = submission.getCard();
-  discards_.push_back(card);
-  player_cards_.at(current_player_).erase(
-      std::find(player_cards_.at(current_player_).begin(),
-                player_cards_.at(current_player_).end(),
-                card));
-  table_color_ = card.getColor();
-  table_pattern_ = card.getPattern();
+  discardCard(current_player_, card);
 
   /* 合理的なプレイヤはUNO宣言忘れを必ず指摘するので、このクラスでは自動でペナルティを課す。 */
   if (player_cards_.at(current_player_).size() == 1 && !submission.getShouldYellUNO()) {
@@ -375,6 +374,26 @@ std::string UnoState::toString() const {
   result += "  ";
   result += drawn_card_.toString();
   result += "\n";
+  result += "\n";
+
+  result += "遷移時にプレイヤに追加されたカード\n";
+  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+    result += "  ";
+    for (const Card card : add_cards_.at(i)) {
+      result += card.toString() + " ";
+    }
+    result += "\n";
+  }
+  result += "\n";
+
+  result += "遷移時にプレイヤから削除されたカード\n";
+  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+    result += "  ";
+    for (const Card card : sub_cards_.at(i)) {
+      result += card.toString() + " ";
+    }
+    result += "\n";
+  }
   result += "\n";
 
   return result;

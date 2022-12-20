@@ -39,16 +39,22 @@ TEST(StateTransitionTest, NotChallenge) {
       table_card.getPattern(),
       true,
       {},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{Card::kWildDraw4}}
   };
   UnoState dst_state{src_state.next(false)};
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
+  Cards target_add_cards{
+      Card::kWildCustomizable,
+      Card::kWildCustomizable,
+      Card::kWildCustomizable,
+      Card::kWildShuffleHands
+  };
+  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
+  target_deck.erase(target_deck.end() - 4, target_deck.end());
   UnoState target_state{
       target_deck,
       Cards{Card::kYellowZero, table_card},
@@ -63,10 +69,12 @@ TEST(StateTransitionTest, NotChallenge) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {target_add_cards},
+      {}
   };
 
-  EXPECT_EQ(dst_state, target_state);
+  ASSERT_EQ(dst_state, target_state);
 }
 
 /*
@@ -106,18 +114,24 @@ TEST(StateTransitionTest, ChallengeFailed) {
       table_card.getPattern(),
       false,
       {},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{Card::kWildDraw4}}
   };
   UnoState dst_state{src_state.next(true)};
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
+  Cards target_add_cards{
+      Card::kWildCustomizable,
+      Card::kWildCustomizable,
+      Card::kWildCustomizable,
+      Card::kWildShuffleHands,
+      Card::kWildDraw4,
+      Card::kWildDraw4
+  };
+  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
+  target_deck.erase(target_deck.end() - 6, target_deck.end());
   UnoState target_state{
       target_deck,
       Cards{Card::kBlueZero, table_card},
@@ -132,7 +146,9 @@ TEST(StateTransitionTest, ChallengeFailed) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {target_add_cards},
+      {}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -175,17 +191,23 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
       table_card.getPattern(),
       true,
       {},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{Card::kWildDraw4}}
   };
   UnoState dst_state{src_state.next(true)};
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  target_player_cards.at(3).push_back(Card::kWildDraw4);
-  target_player_cards.at(3).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(3).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(3).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(3).push_back(target_deck.back()); target_deck.pop_back();
+  Cards target_add_cards{
+      Card::kWildDraw4,
+      Card::kWildCustomizable,
+      Card::kWildCustomizable,
+      Card::kWildCustomizable,
+      Card::kWildShuffleHands
+  };
+  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(3)));
+  target_deck.erase(target_deck.end() - 4, target_deck.end());
   UnoState target_state{
       target_deck,
       Cards{Card::kYellowZero},
@@ -200,7 +222,9 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
       CardNumber::kZero,
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {Cards(), Cards(), Cards(), target_add_cards},
+      {}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -243,7 +267,9 @@ TEST(StateTransitionTest, ColorChoice) {
       table_card.getPattern(),
       false,
       {},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{Card::kWildDraw4}}
   };
   UnoState dst_state{src_state.next(Color::kBlue)};
 
@@ -261,7 +287,9 @@ TEST(StateTransitionTest, ColorChoice) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -304,15 +332,21 @@ TEST(StateTransitionTest, IlligalColorChoice) {
       table_card.getPattern(),
       false,
       {},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{Card::kWild}}
   };
   UnoState dst_state{src_state.next(Color::kWild)};
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  target_player_cards.at(0).push_back(table_card);
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
+  Cards target_add_cards{
+      table_card,
+      Card::kWildCustomizable,
+      Card::kWildCustomizable,
+  };
+  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
+  target_deck.erase(target_deck.end() - 2, target_deck.end());
   UnoState target_state{
       target_deck,
       Cards{Card::kBlueZero},
@@ -327,7 +361,9 @@ TEST(StateTransitionTest, IlligalColorChoice) {
       CardPattern(CardNumber::kZero),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {target_add_cards},
+      {}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -336,7 +372,7 @@ TEST(StateTransitionTest, IlligalColorChoice) {
 
 /*
   状態遷移テスト。カードを引いた後、引いたカードを提出する場合。
-  前状態: 前プレイヤが青0を出した後、現プレイヤが空の手を出した。カードとして、青2を受け取る。
+  前状態: 前プレイヤが青0を出した後、現プレイヤが空の手を出した。カードとして、青3を受け取る。
   着手: 引いたカード(青3)を提出する。
   次状態: 提出が受理され、次プレイヤに手番が移る。
 */
@@ -372,7 +408,9 @@ TEST(StateTransitionTest, SubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       drawn_card,
-      XorShift64()
+      XorShift64(),
+      {Cards{drawn_card}},
+      {}
   };
   UnoState dst_state{src_state.next(Submission(drawn_card, false))};
 
@@ -397,7 +435,9 @@ TEST(StateTransitionTest, SubmissionOfDrawnCard) {
       drawn_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{drawn_card}}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -441,14 +481,20 @@ TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       drawn_card,
-      XorShift64()
+      XorShift64(),
+      {Cards{drawn_card}},
+      {}
   };
   UnoState dst_state{src_state.next(Submission(drawn_card, false))};
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
+  Cards target_add_cards{
+      Card::kWildCustomizable,
+      Card::kWildCustomizable
+  };
+  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
+  target_deck.erase(target_deck.end() - 2, target_deck.end());
   UnoState target_state{
       target_deck,
       Cards{table_card},
@@ -463,7 +509,9 @@ TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {target_add_cards},
+      {}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -507,7 +555,9 @@ TEST(StateTransitionTest, EmptySubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       drawn_card,
-      XorShift64()
+      XorShift64(),
+      {},
+      {}
   };
   UnoState dst_state{src_state.next(Submission({}, false))};
 
@@ -526,7 +576,9 @@ TEST(StateTransitionTest, EmptySubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -568,14 +620,20 @@ TEST(StateTransitionTest, IlligalSubmission) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{table_card}}
   };
   UnoState dst_state{src_state.next(Submission(submitted_card, false))};
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(0).push_back(target_deck.back()); target_deck.pop_back();
+  Cards target_add_cards{
+      Card::kWildCustomizable,
+      Card::kWildCustomizable
+  };
+  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
+  target_deck.erase(target_deck.end() - 2, target_deck.end());
   UnoState target_state{
       target_deck,
       Cards{table_card},
@@ -590,7 +648,9 @@ TEST(StateTransitionTest, IlligalSubmission) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {target_add_cards},
+      {}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -631,7 +691,9 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{table_card}}
   };
   UnoState dst_state{src_state.next(Submission({}, false))};
 
@@ -639,7 +701,11 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
   Cards target_deck{src_deck};
   target_deck.erase(std::find(target_deck.begin(), target_deck.end(), drawn_card));
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  target_player_cards.at(0).push_back(drawn_card);
+  Cards target_add_cards{
+    Card::kWildCustomizable
+  };
+  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
+  target_deck.erase(target_deck.end() - 1, target_deck.end());
   UnoState target_state{
       target_deck,
       Cards{table_card},
@@ -654,7 +720,9 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
       table_card.getPattern(),
       false,
       drawn_card,
-      XorShift64()
+      XorShift64(),
+      {Cards{target_add_cards}},
+      {}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -696,7 +764,9 @@ TEST(StateTransitionTest, NumberSubmission) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
   UnoState dst_state{src_state.next(Submission(submitted_card, false))};
 
@@ -720,7 +790,9 @@ TEST(StateTransitionTest, NumberSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{submitted_card}}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -762,7 +834,9 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{table_card}}
   };
   UnoState dst_state{src_state.next(Submission(submitted_card, false))};
 
@@ -773,8 +847,12 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
     target_player_cards.at(0).end(),
     submitted_card
   ));
-  target_player_cards.at(1).push_back(target_deck.back()); target_deck.pop_back();
-  target_player_cards.at(1).push_back(target_deck.back()); target_deck.pop_back();
+  Cards target_add_cards{
+      Card::kWildCustomizable,
+      Card::kWildCustomizable
+  };
+  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(1)));
+  target_deck.erase(target_deck.end() - 2, target_deck.end());
   UnoState target_state{
       target_deck,
       Cards{table_card, submitted_card},
@@ -789,7 +867,9 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {Cards(), target_add_cards},
+      {Cards{submitted_card}}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -831,7 +911,9 @@ TEST(StateTransitionTest, ReverseSubmission) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{table_card}}
   };
   UnoState dst_state{src_state.next(Submission(submitted_card, false))};
 
@@ -855,7 +937,9 @@ TEST(StateTransitionTest, ReverseSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{submitted_card}}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -897,7 +981,9 @@ TEST(StateTransitionTest, SkipSubmission) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
   UnoState dst_state{src_state.next(Submission(submitted_card, false))};
 
@@ -921,7 +1007,9 @@ TEST(StateTransitionTest, SkipSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{submitted_card}}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -963,7 +1051,9 @@ TEST(StateTransitionTest, WildSubmission) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
   UnoState dst_state{src_state.next(Submission(submitted_card, false))};
 
@@ -987,7 +1077,9 @@ TEST(StateTransitionTest, WildSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{submitted_card}}
   };
 
   EXPECT_EQ(dst_state, target_state);
@@ -1039,7 +1131,9 @@ TEST(StateTransitionTest, WildDraw4Submission) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
   UnoState dst_state{src_state.next(Submission(submitted_card, false))};
 
@@ -1063,16 +1157,18 @@ TEST(StateTransitionTest, WildDraw4Submission) {
       submitted_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{submitted_card}}
   };
 
   EXPECT_EQ(dst_state, target_state);
 }
 
 /*
-  状態遷移テスト。ワイルドドロー4の提出の場合。
+  状態遷移テスト。シャッフルワイルドの提出の場合。
   前状態: 前プレイヤが青0を出した。
-  着手: ワイルドドロー4を提出する。
+  着手: シャッフルワイルドを提出する。
   次状態: 提出が受理され、チャレンジ有効フラグを更新した後、現プレイヤの色選択手番になる。
 */
 TEST(StateTransitionTest, WildShuffleHandsSubmission) {
@@ -1105,7 +1201,9 @@ TEST(StateTransitionTest, WildShuffleHandsSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
   UnoState dst_state{src_state.next(Submission(submitted_card, false))};
 
@@ -1167,7 +1265,9 @@ TEST(StateTransitionTest, AlreadyFinished) {
       submitted_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
   UnoState dst_state{src_state.next(Submission(submitted_card, false))};
 
@@ -1209,7 +1309,9 @@ TEST(LegalMovesTest, ColorChoice) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{table_card}}
   };
 
   auto legal_moves = state.legalMoves();
@@ -1256,7 +1358,9 @@ TEST(LegalMovesTest, Challenge) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards{table_card}}
   };
 
   auto legal_moves = state.legalMoves();
@@ -1302,7 +1406,9 @@ TEST(LegalMovesTest, SubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       drawn_card,
-      XorShift64()
+      XorShift64(),
+      {Cards{drawn_card}},
+      {}
   };
 
   auto legal_moves = state.legalMoves();
@@ -1348,7 +1454,9 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardNothing) {
       table_card.getPattern(),
       false,
       drawn_card,
-      XorShift64()
+      XorShift64(),
+      {Cards{drawn_card}},
+      {}
   };
 
   auto legal_moves = state.legalMoves();
@@ -1393,7 +1501,9 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardOnUNO) {
       table_card.getPattern(),
       false,
       drawn_card,
-      XorShift64()
+      XorShift64(),
+      {Cards{drawn_card}},
+      {}
   };
 
   auto legal_moves = state.legalMoves();
@@ -1437,7 +1547,9 @@ TEST(LegalMovesTest, SubmissionMultiple) {
       table_card.getPattern(),
       false,
       {},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
   auto legal_moves = state.legalMoves();
@@ -1483,7 +1595,9 @@ TEST(LegalMovesTest, SubmissionMultipleOnUno) {
       table_card.getPattern(),
       false,
       {},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
   auto legal_moves = state.legalMoves();
@@ -1528,7 +1642,9 @@ TEST(LegalMovesTest, SubmissionNothing) {
       table_card.getPattern(),
       false,
       {},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
   auto legal_moves = state.legalMoves();
@@ -1576,7 +1692,9 @@ TEST(IsFinishedTest, True) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
   EXPECT_TRUE(state.isFinished());
@@ -1613,7 +1731,9 @@ TEST(IsFinishedTest, False) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
   EXPECT_FALSE(state.isFinished());
@@ -1650,7 +1770,9 @@ TEST(GetScoreTest, NotFinished) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
   for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
@@ -1690,7 +1812,9 @@ TEST(GetScoreTest, Number) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
   state = state.next(Submission(submitted_card, false));
 
@@ -1737,7 +1861,9 @@ TEST(GetScoreTest, Action) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
   state = state.next(Submission(submitted_card, false));
 
@@ -1778,7 +1904,9 @@ TEST(GetCurrentPlayerNum, Normal) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
   auto legal_moves = state.legalMoves();
@@ -1817,7 +1945,9 @@ TEST(GetPlayerCards, Normal) {
       table_card.getPattern(),
       false,
       Card{},
-      XorShift64()
+      XorShift64(),
+      {},
+      {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
   auto legal_moves = state.legalMoves();

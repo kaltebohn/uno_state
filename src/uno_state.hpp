@@ -134,7 +134,10 @@ class UnoState {
            CardPattern table_pattern,
            bool is_challenge_valid,
            Card drawn_card,
-           XorShift64 random_engine)
+           XorShift64 random_engine,
+           std::array<Cards, 4> add_cards,
+           std::array<Cards, 4> sub_cards 
+           )
       : deck_(deck),
         discards_(discards),
         player_cards_(player_cards),
@@ -148,8 +151,10 @@ class UnoState {
         table_pattern_(table_pattern),
         is_challenge_valid_(is_challenge_valid),
         drawn_card_(drawn_card),
-        random_engine_(random_engine)
-      {}
+        random_engine_(random_engine),
+        add_cards_(add_cards),
+        sub_cards_(sub_cards)
+  {}
 
   /* 受け取った手を適用して得られる状態を返す。 */
   UnoState next(Move move) const;
@@ -179,7 +184,13 @@ class UnoState {
 
   CardPattern getTablePattern() const { return table_pattern_; }
 
+  bool getIsChallengeValid() const { return is_challenge_valid_; }
+
   Card getDrawnCard() const { return drawn_card_; }
+
+  Cards getAddCards(const int player_num) const { return add_cards_.at(player_num); }
+
+  Cards getSubCards(const int player_num) const { return sub_cards_.at(player_num); }
 
   /* テスト用。 */
   virtual bool operator ==(const UnoState& state) const {
@@ -187,6 +198,8 @@ class UnoState {
     if (!std::equal(state.discards_.cbegin(), state.discards_.cend(), discards_.begin())) { return false; }         
     for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
       if (!std::equal(state.player_cards_.at(i).cbegin(), state.player_cards_.at(i).cend(), player_cards_.at(i).begin())) { return false; }         
+      if (!std::equal(state.add_cards_.at(i).cbegin(), state.add_cards_.at(i).cend(), add_cards_.at(i).begin())) { return false; }         
+      if (!std::equal(state.sub_cards_.at(i).cbegin(), state.sub_cards_.at(i).cend(), sub_cards_.at(i).begin())) { return false; }         
     }
     if (!std::equal(state.player_seats_.cbegin(), state.player_seats_.cend(), player_seats_.begin())) { return false; }         
     if (!std::equal(state.player_scores_.cbegin(), state.player_scores_.cend(), player_scores_.begin())) { return false; }         
@@ -219,6 +232,8 @@ class UnoState {
   bool is_challenge_valid_;
   Card drawn_card_; // 直前にプレイヤが引いたカード。
   XorShift64 random_engine_;
+  std::array<Cards, 4> add_cards_{}; // 状態遷移時に各プレイヤに追加されたカード。最初とシャッフルワイルド時は考えない。  
+  std::array<Cards, 4> sub_cards_{}; // 状態遷移時に各プレイヤから削除されたカード。最初とシャッフルワイルド時は考えない。  
 
   /* 可能な提出カードの全体を返す。 */
   virtual std::vector<Submission> legalSubmissions() const;
@@ -359,17 +374,47 @@ class UnoState {
 
   int nextPlayer() const { return nextPlayerOf(current_player_); }
 
+  /* プレイヤに山札からnum枚のカードを渡す。 */
   virtual void giveCards(const int player_number, const int num) {
     for (int i = 0; i < num; i++) {
       if (deck_.size() == 0) { refreshDeck(); }
 
-      /* 捨て札も山札も0枚の場合、手札を捨てないプレイヤが存在する。 */
+      /* 捨て札も山札も0枚の場合、バグか何かで手札をまったく捨てていないプレイヤが存在する。 */
       /* このクラスはそうしたプレイヤを許容する必要がないので、強制終了させる。 */
       assert(deck_.size() > 0);
 
       const Card card = deck_.back(); deck_.pop_back();
       player_cards_.at(player_number).push_back(card);
+      add_cards_.at(player_number).push_back(card);
     }
+  }
+
+  /* プレイヤの手札に捨て札からnum枚のカードを返す。 */
+  virtual void returnCards(const int player_number, const int num) {
+    for (int i = 0; i < num; i++) {
+      assert(discards_.size() > 0); // ルール上、捨て札にはプレイヤが出した分(>= 返す分)以上あるはず。
+      player_cards_.at(player_number).push_back(discards_.back());
+      add_cards_.at(player_number).push_back(discards_.back());
+      discards_.pop_back();
+    }
+  }
+
+  /* プレイヤの手札を場に捨てる。 */
+  virtual void discardCard(const int player_number, const Card& card) {
+    assert(std::find(player_cards_.at(player_number).begin(),
+                     player_cards_.at(player_number).end(),
+                     card) !=
+           player_cards_.at(player_number).end());
+
+    discards_.push_back(card);
+    player_cards_.at(player_number).erase(
+        std::find(player_cards_.at(player_number).begin(),
+                  player_cards_.at(player_number).end(),
+                  card));
+    sub_cards_.at(player_number).push_back(card);
+
+    table_color_ = card.getColor();
+    table_pattern_ = card.getPattern();
   }
 
   void shuffleCards(std::vector<Card>& cards) {

@@ -26,6 +26,8 @@ class UnoStateBind2 final : public UnoState {
                 const bool is_challenge_valid,
                 const Card drawn_card,
                 const XorShift64 random_engine,
+                const std::array<Cards, 4>& add_cards,
+                const std::array<Cards, 4>& sub_cards,
                 const int bound_player,
                 const int bound_turn)
       : UnoState::UnoState(deck,
@@ -41,7 +43,9 @@ class UnoStateBind2 final : public UnoState {
                            table_pattern,
                            is_challenge_valid,
                            drawn_card,
-                           random_engine),
+                           random_engine,
+                           add_cards,
+                           sub_cards),
         bound_player_(bound_player),
         bound_turn_(bound_turn)
       {}
