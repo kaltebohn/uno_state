@@ -25,6 +25,7 @@ class UnoStateBind2 final : public UnoState {
                 const CardPattern table_pattern,
                 const bool is_challenge_valid,
                 const Card drawn_card,
+                const Move last_move,
                 const XorShift64 random_engine,
                 const std::array<Cards, 4>& add_cards,
                 const std::array<Cards, 4>& sub_cards,
@@ -43,6 +44,7 @@ class UnoStateBind2 final : public UnoState {
                            table_pattern,
                            is_challenge_valid,
                            drawn_card,
+                           last_move,
                            random_engine,
                            add_cards,
                            sub_cards),
@@ -65,6 +67,7 @@ class UnoStateBind2 final : public UnoState {
         (std::get<Submission>(move).getCard() == Card::kWildCustomizable)) {
       const Submission submission{std::get<Submission>(move)};
       UnoStateBind2 state{*this};
+      state.last_move_ = move;
       state.acceptSubmission(submission);
       return nextWhenWildCustomizableSubmission(state);
     }

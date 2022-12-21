@@ -134,6 +134,7 @@ class UnoState {
            CardPattern table_pattern,
            bool is_challenge_valid,
            Card drawn_card,
+           Move last_move,
            XorShift64 random_engine,
            std::array<Cards, 4> add_cards,
            std::array<Cards, 4> sub_cards 
@@ -151,6 +152,7 @@ class UnoState {
         table_pattern_(table_pattern),
         is_challenge_valid_(is_challenge_valid),
         drawn_card_(drawn_card),
+        last_move_(last_move),
         random_engine_(random_engine),
         add_cards_(add_cards),
         sub_cards_(sub_cards)
@@ -170,16 +172,17 @@ class UnoState {
 
   Cards getDiscards() const { return discards_; }
   Cards getPlayerCards(int player_num) const { return player_cards_.at(player_num); }
-  std::array<int, UnoConsts::kNumOfPlayers> getAllPlayerSeats() const { return player_seats_; }
   int getPlayerSeats(const int player_num) const { return player_seats_.at(player_num); }
   double getScore(const int player_num) const { return player_scores_.at(player_num); }
   MoveType getCurrentMoveType() const { return current_move_type_; }
   int getPrevPlayerNum() const { return prev_player_; }
+  std::array<int, UnoConsts::kNumOfPlayers> getAllPlayerSeats() const { return player_seats_; }
   int getCurrentPlayerNum() const { return current_player_; }
   bool getIsNormalOrder() const { return is_normal_order_; }
   Color getTableColor() const { return table_color_; }
   CardPattern getTablePattern() const { return table_pattern_; }
   Card getDrawnCard() const { return drawn_card_; }
+  Move getLastMove() const { return last_move_; }
   Cards getAddCards(const int player_num) const { return add_cards_.at(player_num); }
   Cards getSubCards(const int player_num) const { return sub_cards_.at(player_num); }
 
@@ -231,6 +234,7 @@ class UnoState {
   CardPattern table_pattern_;
   bool is_challenge_valid_;
   Card drawn_card_; // 直前にプレイヤが引いたカード。
+  Move last_move_{};
   XorShift64 random_engine_;
   std::array<Cards, 4> add_cards_{}; // 状態遷移時に各プレイヤに追加されたカード。最初とシャッフルワイルド時は考えない。  
   std::array<Cards, 4> sub_cards_{}; // 状態遷移時に各プレイヤから削除されたカード。最初とシャッフルワイルド時は考えない。  

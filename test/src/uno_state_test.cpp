@@ -39,6 +39,7 @@ TEST(StateTransitionTest, NotChallenge) {
       table_card.getPattern(),
       true,
       {},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{Card::kWildDraw4}}
@@ -69,6 +70,7 @@ TEST(StateTransitionTest, NotChallenge) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {target_add_cards},
       {}
@@ -114,6 +116,7 @@ TEST(StateTransitionTest, ChallengeFailed) {
       table_card.getPattern(),
       false,
       {},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{Card::kWildDraw4}}
@@ -146,6 +149,7 @@ TEST(StateTransitionTest, ChallengeFailed) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {target_add_cards},
       {}
@@ -191,6 +195,7 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
       table_card.getPattern(),
       true,
       {},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{Card::kWildDraw4}}
@@ -222,6 +227,7 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
       CardNumber::kZero,
       false,
       Card{},
+      Move(),
       XorShift64(),
       {Cards(), Cards(), Cards(), target_add_cards},
       {}
@@ -267,6 +273,7 @@ TEST(StateTransitionTest, ColorChoice) {
       table_card.getPattern(),
       false,
       {},
+      Move(),
       XorShift64(),
       {},
       {Cards{Card::kWildDraw4}}
@@ -287,6 +294,7 @@ TEST(StateTransitionTest, ColorChoice) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {}
@@ -332,6 +340,7 @@ TEST(StateTransitionTest, IlligalColorChoice) {
       table_card.getPattern(),
       false,
       {},
+      Move(),
       XorShift64(),
       {},
       {Cards{Card::kWild}}
@@ -361,6 +370,7 @@ TEST(StateTransitionTest, IlligalColorChoice) {
       CardPattern(CardNumber::kZero),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {target_add_cards},
       {}
@@ -408,6 +418,7 @@ TEST(StateTransitionTest, SubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       drawn_card,
+      Move(),
       XorShift64(),
       {Cards{drawn_card}},
       {}
@@ -435,6 +446,7 @@ TEST(StateTransitionTest, SubmissionOfDrawnCard) {
       drawn_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{drawn_card}}
@@ -481,6 +493,7 @@ TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       drawn_card,
+      Move(),
       XorShift64(),
       {Cards{drawn_card}},
       {}
@@ -509,6 +522,7 @@ TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {target_add_cards},
       {}
@@ -555,6 +569,7 @@ TEST(StateTransitionTest, EmptySubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       drawn_card,
+      Move(),
       XorShift64(),
       {},
       {}
@@ -576,6 +591,7 @@ TEST(StateTransitionTest, EmptySubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {}
@@ -620,6 +636,7 @@ TEST(StateTransitionTest, IlligalSubmission) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{table_card}}
@@ -648,6 +665,7 @@ TEST(StateTransitionTest, IlligalSubmission) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {target_add_cards},
       {}
@@ -691,6 +709,7 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{table_card}}
@@ -720,6 +739,7 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
       table_card.getPattern(),
       false,
       drawn_card,
+      Move(),
       XorShift64(),
       {Cards{target_add_cards}},
       {}
@@ -764,6 +784,7 @@ TEST(StateTransitionTest, NumberSubmission) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -790,6 +811,7 @@ TEST(StateTransitionTest, NumberSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{submitted_card}}
@@ -834,6 +856,7 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{table_card}}
@@ -867,6 +890,7 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {Cards(), target_add_cards},
       {Cards{submitted_card}}
@@ -911,6 +935,7 @@ TEST(StateTransitionTest, ReverseSubmission) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{table_card}}
@@ -937,6 +962,7 @@ TEST(StateTransitionTest, ReverseSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{submitted_card}}
@@ -981,6 +1007,7 @@ TEST(StateTransitionTest, SkipSubmission) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1007,6 +1034,7 @@ TEST(StateTransitionTest, SkipSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{submitted_card}}
@@ -1051,6 +1079,7 @@ TEST(StateTransitionTest, WildSubmission) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1077,6 +1106,7 @@ TEST(StateTransitionTest, WildSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{submitted_card}}
@@ -1131,6 +1161,7 @@ TEST(StateTransitionTest, WildDraw4Submission) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1157,6 +1188,7 @@ TEST(StateTransitionTest, WildDraw4Submission) {
       submitted_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{submitted_card}}
@@ -1201,6 +1233,7 @@ TEST(StateTransitionTest, WildShuffleHandsSubmission) {
       submitted_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1265,6 +1298,7 @@ TEST(StateTransitionTest, AlreadyFinished) {
       submitted_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1309,6 +1343,7 @@ TEST(LegalMovesTest, ColorChoice) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{table_card}}
@@ -1358,6 +1393,7 @@ TEST(LegalMovesTest, Challenge) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards{table_card}}
@@ -1406,6 +1442,7 @@ TEST(LegalMovesTest, SubmissionOfDrawnCard) {
       table_card.getPattern(),
       false,
       drawn_card,
+      Move(),
       XorShift64(),
       {Cards{drawn_card}},
       {}
@@ -1454,6 +1491,7 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardNothing) {
       table_card.getPattern(),
       false,
       drawn_card,
+      Move(),
       XorShift64(),
       {Cards{drawn_card}},
       {}
@@ -1501,6 +1539,7 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardOnUNO) {
       table_card.getPattern(),
       false,
       drawn_card,
+      Move(),
       XorShift64(),
       {Cards{drawn_card}},
       {}
@@ -1547,6 +1586,7 @@ TEST(LegalMovesTest, SubmissionMultiple) {
       table_card.getPattern(),
       false,
       {},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1595,6 +1635,7 @@ TEST(LegalMovesTest, SubmissionMultipleOnUno) {
       table_card.getPattern(),
       false,
       {},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1642,6 +1683,7 @@ TEST(LegalMovesTest, SubmissionNothing) {
       table_card.getPattern(),
       false,
       {},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1692,6 +1734,7 @@ TEST(IsFinishedTest, True) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1731,6 +1774,7 @@ TEST(IsFinishedTest, False) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1770,6 +1814,7 @@ TEST(GetScoreTest, NotFinished) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1812,6 +1857,7 @@ TEST(GetScoreTest, Number) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1861,6 +1907,7 @@ TEST(GetScoreTest, Action) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1904,6 +1951,7 @@ TEST(GetCurrentPlayerNum, Normal) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
@@ -1945,6 +1993,7 @@ TEST(GetPlayerCards, Normal) {
       table_card.getPattern(),
       false,
       Card{},
+      Move(),
       XorShift64(),
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}

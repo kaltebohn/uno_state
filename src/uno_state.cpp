@@ -22,6 +22,8 @@ UnoState UnoState::next(Move move) const {
   /* 自分のコピー。こいつの状態をどんどん書き換えて次状態にし、返す。 */
   UnoState state{*this};
 
+  state.last_move_ = move;
+
   /* 現状態に遷移する際発生した各プレイヤの手札の差分をリセット。 */
   state.add_cards_.fill({});
   state.sub_cards_.fill({});
