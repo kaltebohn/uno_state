@@ -170,6 +170,7 @@ class UnoState {
 
   Cards getDiscards() const { return discards_; }
   Cards getPlayerCards(int player_num) const { return player_cards_.at(player_num); }
+  std::array<int, UnoConsts::kNumOfPlayers> getAllPlayerSeats() const { return player_seats_; }
   int getPlayerSeats(const int player_num) const { return player_seats_.at(player_num); }
   double getScore(const int player_num) const { return player_scores_.at(player_num); }
   MoveType getCurrentMoveType() const { return current_move_type_; }
