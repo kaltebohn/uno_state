@@ -33,6 +33,22 @@ class UnoState {
     return os;
   }
 
+  /* ベクタに格納するのに必要。何か意味のある状態ではない。 */
+  UnoState()
+      : deck_(),
+        discards_(),
+        player_cards_(),
+        player_seats_(),
+        player_scores_(),
+        current_move_type_(),
+        prev_player_(),
+        current_player_(),
+        is_normal_order_(),
+        table_color_(),
+        table_pattern_(),
+        is_challenge_valid_(),
+        drawn_card_() {}
+
   /* ゲーム開始用。 */
   UnoState(const Cards& first_deck, XorShift64::result_type random_seed = 0, Card first_table_card = {})
       : deck_(first_deck),
@@ -219,6 +235,8 @@ class UnoState {
   }
 
   virtual std::string toString() const;
+
+  virtual void print() const { std::cout << *this; }
 
  protected:
   Cards deck_;
