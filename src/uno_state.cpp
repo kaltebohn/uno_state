@@ -275,7 +275,7 @@ std::vector<Move> UnoState::legalMoves() const {
 
 std::vector<Submission> UnoState::legalSubmissions() const {
   const bool should_yell_UNO{currentPlayerShouldYellUNO()};
-  std::vector<Submission> result{{Card{}, should_yell_UNO}}; // 空のカードは必ず選択肢に含める。
+  std::vector<Submission> result{{Card{}, false}}; // 空のカードは必ず選択肢に含める。
   for (const Card& card : player_cards_.at(current_player_)) {
     Submission submission{card, should_yell_UNO};
     if (submission.isLegal(table_color_, table_pattern_)) {
