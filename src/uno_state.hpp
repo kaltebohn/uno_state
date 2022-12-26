@@ -102,6 +102,7 @@ class UnoState {
     table_pattern_ =first_table_card.getPattern();
 
     /* 始点のプレイヤを決定。 */
+    assert(std::find(player_seats_.begin(), player_seats_.end(), 0) != player_seats_.end());
     int const first_player = *std::find(player_seats_.begin(), player_seats_.end(), 0);
 
     /* 最初の1枚の効果を反映させる。 */
@@ -308,8 +309,6 @@ class UnoState {
   /* 共通処理を実施した状態に、ワイルドの効果を反映させる。 */
   UnoState nextWhenWildSubmission(UnoState& state) const {
     state.current_move_type_ = MoveType::kColorChoice;
-    state.current_player_ = nextPlayer();
-    state.prev_player_ = current_player_;
     return state;
   }
 
@@ -322,8 +321,6 @@ class UnoState {
   /* 共通処理を実施した状態に、ワイルドドロー4の効果を反映させる。 */
   UnoState nextWhenWildDraw4Submission(UnoState& state) const {
     state.current_move_type_ = MoveType::kColorChoice;
-    state.current_player_ = nextPlayer();
-    state.prev_player_ = current_player_;
     const auto legal_moves = legalMoves();
     state.is_challenge_valid_ = (std::any_of(legal_moves.begin(), legal_moves.end(),
         [](Move move) {
@@ -340,8 +337,6 @@ class UnoState {
   UnoState nextWhenWildShuffleHandsSubmission(UnoState& state) const {
     const int next_player = nextPlayer();
     state.current_move_type_ = MoveType::kColorChoice;
-    state.current_player_ = next_player;
-    state.prev_player_ = current_player_;
 
     std::vector<Card> collected_cards{};
     for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {

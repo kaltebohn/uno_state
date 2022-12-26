@@ -87,13 +87,14 @@ class UnoStateBind2 final : public UnoState {
     const Color table_color{table_color_}; // バインド2の場合、色はそれを出す前のものにする。
     const int current_player{current_player_};
     const int next_player{nextPlayer()};
+    const int next_of_next_player{nextPlayerOf(next_player)};
 
     state.current_move_type_ = MoveType::kSubmission;
     state.table_color_ = table_color;
     state.prev_player_ = current_player;
-    state.current_player_ = next_player;
+    state.current_player_ = next_of_next_player;
     state.bound_player_ = next_player;
-    state.bound_turn_ = 2;
+    state.bound_turn_ = 1; // 次飛ばされ、その次に1回飛ばされ、計2回行動不能になる。
 
     return state;
   }

@@ -9,6 +9,7 @@ UnoStateBind2 UnoStateBind2::next(const Move& move) const {
       (std::get<Submission>(move).getCard() == Card::kWildCustomizable)) {
     const Submission submission{std::get<Submission>(move)};
     UnoStateBind2 state{*this};
+
     state.last_move_ = move;
     state.acceptSubmission(submission);
     return nextWhenWildCustomizableSubmission(state);
@@ -58,10 +59,12 @@ std::string UnoStateBind2::toString() const {
   result += "バインドされたプレイヤ\n";
   result += "  ";
   result += std::to_string(bound_player_);
+  result += "\n";
 
   result += "バインドされる残りターン数\n";
   result += "  ";
   result += std::to_string(bound_turn_);
+  result += "\n";
 
   return result;
 }

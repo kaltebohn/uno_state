@@ -378,6 +378,12 @@ std::string UnoState::toString() const {
   result += "\n";
   result += "\n";
 
+  result += "直前の行動\n";
+  result += "  ";
+  result += move2String(last_move_);;
+  result += "\n";
+  result += "\n";
+
   result += "遷移時にプレイヤに追加されたカード\n";
   for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
     result += "  ";

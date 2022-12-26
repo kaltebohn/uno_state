@@ -28,14 +28,14 @@ TEST_CFLAGS		= -std=c++17 -Wall -pthread -lgtest_main -lgtest
 
 test: $(TEST_TARGETS)
 
-$(TEST_OUTDIR)/card_test:	$(TEST_SRCDIR)/card_test.cpp $(OBJDIR)/card.o
+$(TEST_OUTDIR)/card_test:	$(TEST_SRCDIR)/card_test.cpp $(OBJDIR)/move.o $(OBJDIR)/card.o
 	$(CC) $(TEST_CFLAGS) -o $@ $^
 
-$(TEST_OUTDIR)/submission_test:	$(TEST_SRCDIR)/submission_test.cpp $(OBJDIR)/card.o
+$(TEST_OUTDIR)/submission_test:	$(TEST_SRCDIR)/submission_test.cpp $(OBJDIR)/move.o $(OBJDIR)/card.o
 	$(CC) $(TEST_CFLAGS) -o $@ $^
 
 
-$(TEST_OUTDIR)/uno_state_test:	$(TEST_SRCDIR)/uno_state_test.cpp $(OBJDIR)/uno_state.o $(OBJDIR)/card.o
+$(TEST_OUTDIR)/uno_state_test:	$(TEST_SRCDIR)/uno_state_test.cpp $(OBJDIR)/uno_state.o $(OBJDIR)/move.o $(OBJDIR)/card.o
 	$(CC) $(TEST_CFLAGS) -o $@ $^
 
 $(TEST_OUTDIR)/uno_state_bind2_test:
