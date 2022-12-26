@@ -8,4 +8,6 @@
 using ChallengeFlag = bool;
 using Move = std::variant<std::monostate, Submission, Color, ChallengeFlag>;
 
+std::string move2String(const Move move);
+
 #endif // MOVE_HPP_
