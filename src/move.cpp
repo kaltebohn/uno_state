@@ -2,7 +2,7 @@
 
 std::string move2String(const Move move) {
   if (std::holds_alternative<std::monostate>(move)) {
-    return "空の行動";
+    return "Empty";
   } else if(std::holds_alternative<Submission>(move)) {
     return std::get<Submission>(move).toString();
   } else if (std::holds_alternative<Color>(move)) {

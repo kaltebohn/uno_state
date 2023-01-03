@@ -32,7 +32,7 @@ class Submission {
   constexpr bool operator !=(const Submission& submission) const { return *this == submission; }
 
   std::string toString() const {
-    return card_.toString() + ", UNOコール" + (should_yell_UNO_ ? "有" : "無");
+    return card_.toString() + ", " + (should_yell_UNO_ ? "" : "Not") + " yelled UNO";
   }
 
  private:

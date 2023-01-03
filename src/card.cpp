@@ -3,19 +3,19 @@
 std::string color2String(const Color& color) {
   switch (color) {
     case Color::kBlue:
-      return "青";
+      return "B";
     case Color::kGreen:
-      return "緑";
+      return "G";
     case Color::kRed:
-      return "赤";
+      return "R";
     case Color::kYellow:
-      return "黄";
+      return "Y";
     case Color::kWild:
-      return "ワイルド";
+      return "W";
     case Color::kNull:
-      return "空の色";
+      return "Empty";
     default:
-      return "不適切な色";
+      assert(false);
   }
 }
 
@@ -42,7 +42,7 @@ std::string cardNumber2String(const CardNumber card_number) {
     case CardNumber::kNine:
       return "9";
     default:
-      return "不適切な数字";
+      assert(false);
   }
 }
 
@@ -76,19 +76,19 @@ int cardNumber2Int(const CardNumber card_number) {
 std::string cardAction2String(const CardAction card_action) {
   switch (card_action) {
     case CardAction::kDrawTwo:
-      return "ドロー2";
+      return "DrawTwo";
     case CardAction::kReverse:
-      return "リバース";
+      return "Reverse";
     case CardAction::kSkip:
-      return "スキップ";
+      return "Skip";
     case CardAction::kWild:
-      return "ワイルド";
+      return "Wild";
     case CardAction::kWildDraw4:
-      return "ワイルドドロー4";
+      return "WildDraw4";
     case CardAction::kWildShuffleHands:
-      return "シャッフルワイルド";
+      return "WildShuffleHands";
     case CardAction::kWildCustomizable:
-      return "白いワイルド";
+      return "WildCustomizable";
     default:
       assert(false);
   }
@@ -96,7 +96,7 @@ std::string cardAction2String(const CardAction card_action) {
 
 std::string cardPattern2String(const CardPattern card_pattern) {
   if (std::holds_alternative<std::monostate>(card_pattern)) {
-    return "空の模様";
+    return "Empty";
   } else if (std::holds_alternative<CardNumber>(card_pattern)) {
     return cardNumber2String(std::get<CardNumber>(card_pattern));
   } else if (std::holds_alternative<CardAction>(card_pattern)) {
@@ -166,117 +166,117 @@ std::string Card::toString() const {
   if (isEmpty()) { return "空"; }
 
   if (*this == kBlueZero) {
-    return "青0";
+    return "B-0";
   } else if (*this == kBlueOne) {
-    return "青1";
+    return "B-1";
   } else if (*this == kBlueTwo) {
-    return "青2";
+    return "B-2";
   } else if (*this == kBlueThree) {
-    return "青3";
+    return "B-3";
   } else if (*this == kBlueFour) {
-    return "青4";
+    return "B-4";
   } else if (*this == kBlueFive) {
-    return "青5";
+    return "B-5";
   } else if (*this == kBlueSix) {
-    return "青6";
+    return "B-6";
   } else if (*this == kBlueSeven) {
-    return "青7";
+    return "B-7";
   } else if (*this == kBlueEight) {
-    return "青8";
+    return "B-8";
   } else if (*this == kBlueNine) {
-    return "青9";
+    return "B-9";
   } else if (*this == kBlueDrawTwo) {
-    return "青ドロー2";
+    return "B-DrawTwo";
   } else if (*this == kBlueReverse) {
-    return "青リバース";
+    return "B-Reverse";
   } else if (*this == kBlueSkip) {
-    return "青スキップ";
+    return "B-Skip";
   } else if (*this == kGreenZero) {
-    return "緑0";
+    return "G-0";
   } else if (*this == kGreenOne) {
-    return "緑1";
+    return "G-1";
   } else if (*this == kGreenTwo) {
-    return "緑2";
+    return "G-2";
   } else if (*this == kGreenThree) {
-    return "緑3";
+    return "G-3";
   } else if (*this == kGreenFour) {
-    return "緑4";
+    return "G-4";
   } else if (*this == kGreenFive) {
-    return "緑5";
+    return "G-5";
   } else if (*this == kGreenSix) {
-    return "緑6";
+    return "G-6";
   } else if (*this == kGreenSeven) {
-    return "緑7";
+    return "G-7";
   } else if (*this == kGreenEight) {
-    return "緑8";
+    return "G-8";
   } else if (*this == kGreenNine) {
-    return "緑9";
+    return "G-9";
   } else if (*this == kGreenDrawTwo) {
-    return "緑ドロー2";
+    return "G-DrawTwo";
   } else if (*this == kGreenReverse) {
-    return "緑リバース";
+    return "G-Reverse";
   } else if (*this == kGreenSkip) {
-    return "緑スキップ";
+    return "G-Skip";
   } else if (*this == kRedZero) {
-    return "赤0";
+    return "R-0";
   } else if (*this == kRedOne) {
-    return "赤1";
+    return "R-1";
   } else if (*this == kRedTwo) {
-    return "赤2";
+    return "R-2";
   } else if (*this == kRedThree) {
-    return "赤3";
+    return "R-3";
   } else if (*this == kRedFour) {
-    return "赤4";
+    return "R-4";
   } else if (*this == kRedFive) {
-    return "赤5";
+    return "R-5";
   } else if (*this == kRedSix) {
-    return "赤6";
+    return "R-6";
   } else if (*this == kRedSeven) {
-    return "赤7";
+    return "R-7";
   } else if (*this == kRedEight) {
-    return "赤8";
+    return "R-8";
   } else if (*this == kRedNine) {
-    return "赤9";
+    return "R-9";
   } else if (*this == kRedDrawTwo) {
-    return "赤ドロー2";
+    return "R-DrawTwo";
   } else if (*this == kRedReverse) {
-    return "赤リバース";
+    return "R-Reverse";
   } else if (*this == kRedSkip) {
-    return "赤スキップ";
+    return "R-Skip";
   } else if (*this == kYellowZero) {
-    return "黄0";
+    return "Y-0";
   } else if (*this == kYellowOne) {
-    return "黄1";
+    return "Y-1";
   } else if (*this == kYellowTwo) {
-    return "黄2";
+    return "Y-2";
   } else if (*this == kYellowThree) {
-    return "黄3";
+    return "Y-3";
   } else if (*this == kYellowFour) {
-    return "黄4";
+    return "Y-4";
   } else if (*this == kYellowFive) {
-    return "黄5";
+    return "Y-5";
   } else if (*this == kYellowSix) {
-    return "黄6";
+    return "Y-6";
   } else if (*this == kYellowSeven) {
-    return "黄7";
+    return "Y-7";
   } else if (*this == kYellowEight) {
-    return "黄8";
+    return "Y-8";
   } else if (*this == kYellowNine) {
-    return "黄9";
+    return "Y-9";
   } else if (*this == kYellowDrawTwo) {
-    return "黄ドロー2";
+    return "Y-DrawTwo";
   } else if (*this == kYellowReverse) {
-    return "黄リバース";
+    return "Y-Reverse";
   } else if (*this == kYellowSkip) {
-    return "黄スキップ";
+    return "Y-Skip";
   } else if (*this == kWild) {
-    return "ワイルド";
+    return "W-Wild";
   } else if (*this == kWildDraw4) {
-    return "ワイルドドロー4";
+    return "W-WildDraw4";
   } else if (*this == kWildShuffleHands) {
-    return "シャッフルワイルド";
+    return "W-WildShuffleHands";
   } else if (*this == kWildCustomizable) {
-    return "白いワイルド";
+    return "W-WildCustomizable";
   }
   assert(false);
 }

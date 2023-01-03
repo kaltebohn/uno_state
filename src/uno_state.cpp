@@ -3,15 +3,15 @@
 std::string moveType2String(const MoveType move_type) {
   switch (move_type) {
     case MoveType::kSubmission:
-      return "提出";
+      return "Submission";
     case MoveType::kSubmissionOfDrawnCard:
-      return "引いたカードの提出";
+      return "SubmissionOfDrawCard";
     case MoveType::kColorChoice:
-      return "色の選択";
+      return "ColorChoice";
     case MoveType::kChallenge:
-      return "チャレンジ";
+      return "Challenge";
     default:
-      return "不適切な着手型";
+      assert(false);
   }
 }
 
@@ -288,121 +288,260 @@ std::vector<Submission> UnoState::legalSubmissions() const {
 std::string UnoState::toString() const {
   std::string result{};
 
-  result += "山札\n";
+  result += "Deck\n";
   result += "  ";
-  for (const Card card : deck_) {
-    result += card.toString() + " ";
+  if (deck_.size() == 0) {
+    result += "Empty";
+  } else {
+    for (const Card card : deck_) {
+      result += card.toString() + " ";
+    }
   }
   result += "\n";
-  result += "\n";
 
-  result += "捨札\n";
+  result += "Discards\n";
   result += "  ";
-  for (const Card card : discards_) {
-    result += card.toString() + " ";
+  if (discards_.size() == 0) {
+    result += "Empty";
+  } else {
+    for (const Card card : discards_) {
+      result += card.toString() + " ";
+    }
   }
   result += "\n";
-  result += "\n";
 
-  result += "プレイヤの手札\n";
+  result += "PlayerCards\n";
   for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
     result += "  ";
-    for (const Card card : player_cards_.at(i)) {
-      result += card.toString() + " ";
+    if (player_cards_.at(i).size() == 0) {
+      result += "Empty";
+    } else {
+      for (const Card card : player_cards_.at(i)) {
+        result += card.toString() + " ";
+      }
     }
     result += "\n";
   }
-  result += "\n";
 
-  result += "プレイヤの席\n";
+  result += "PlayerSeats\n";
   result += "  ";
   for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
     result += std::to_string(player_seats_.at(i)) + " ";
   }
   result += "\n";
-  result += "\n";
 
-  result += "プレイヤの得点\n";
+  result += "PlayerScores\n";
   result += "  ";
   for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
     result += std::to_string(player_scores_.at(i)) + " ";
   }
   result += "\n";
-  result += "\n";
 
-  result += "着手の型\n";
+  result += "CurrentMoveType\n";
   result += "  ";
   result += moveType2String(current_move_type_);
   result += "\n";
-  result += "\n";
 
-  result += "前のプレイヤ\n";
+  result += "PrevPlayer\n";
   result += "  ";
   result += std::to_string(prev_player_);
   result += "\n";
-  result += "\n";
 
-  result += "現在のプレイヤ\n";
+  result += "CurrentPlayer\n";
   result += "  ";
   result += std::to_string(current_player_);
   result += "\n";
-  result += "\n";
 
-  result += "正順？\n";
+  result += "IsNormalOrder?\n";
   result += "  ";
   result += std::to_string(is_normal_order_);
   result += "\n";
-  result += "\n";
 
-  result += "場の色\n";
+  result += "TableColor\n";
   result += "  ";
   result += color2String(table_color_);
   result += "\n";
-  result += "\n";
 
-  result += "場の模様\n";
+  result += "TablePattern\n";
   result += "  ";
   result += cardPattern2String(table_pattern_);
   result += "\n";
-  result += "\n";
 
-  result += "チャレンジが成功する？\n";
+  result += "IsChallengeValid?\n";
   result += "  ";
   result += std::to_string(is_challenge_valid_);
   result += "\n";
-  result += "\n";
 
-  result += "直前にプレイヤが引いたカード\n";
+  result += "DrawnCard\n";
   result += "  ";
   result += drawn_card_.toString();
   result += "\n";
-  result += "\n";
 
-  result += "直前の行動\n";
+  result += "LastMove\n";
   result += "  ";
   result += move2String(last_move_);;
   result += "\n";
-  result += "\n";
 
-  result += "遷移時にプレイヤに追加されたカード\n";
+  result += "AddCards\n";
   for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
     result += "  ";
-    for (const Card card : add_cards_.at(i)) {
-      result += card.toString() + " ";
+    if (add_cards_.at(i).size() == 0) {
+      result += "Empty";
+    } else {
+      for (const Card card : add_cards_.at(i)) {
+        result += card.toString() + " ";
+      }
+    }
+    result += "\n";
+  }
+
+  result += "SubCards\n";
+  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+    result += "  ";
+    if (sub_cards_.at(i).size() == 0) {
+      result += "Empty";
+    } else {
+      for (const Card card : sub_cards_.at(i)) {
+        result += card.toString() + " ";
+      }
     }
     result += "\n";
   }
   result += "\n";
 
-  result += "遷移時にプレイヤから削除されたカード\n";
-  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-    result += "  ";
-    for (const Card card : sub_cards_.at(i)) {
-      result += card.toString() + " ";
+  return result;
+}
+
+std::string UnoState::toJSON() const {
+  std::string result{};
+
+  result += "{\"deck\":";
+  if (deck_.size() == 0) {
+    result += "\"Empty\"";
+  } else {
+    result += "[";
+    for (const Card card : deck_) {
+      result += '"' + card.toString() + '"' + ",";
     }
-    result += "\n";
+    result += "]";
   }
-  result += "\n";
+  result += ",";
+
+  result += "\"discards\":";
+  if (discards_.size() == 0) {
+    result += "\"Empty\"";
+  } else {
+    result += "[";
+    for (const Card card : discards_) {
+      result += '"' + card.toString() + '"' + ",";
+    }
+    result += "]";
+  }
+  result += ",";
+
+  result += "\"playerCards\":";
+  result += "[";
+  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+    if (player_cards_.at(i).size() == 0) {
+      result += "\"Empty\"";
+    } else {
+      result += "[";
+      for (const Card card : player_cards_.at(i)) {
+        result += '"' + card.toString() + '"' + ",";
+      }
+      result += "]";
+    }
+    result += ",";
+  }
+  result += "]";
+  result += ",";
+
+  result += "\"playerSeats\":";
+  result += "[";
+  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+    result += std::to_string(player_seats_.at(i)) + ",";
+  }
+  result += "]";
+  result += ",";
+
+  result += "\"playerScores\":";
+  result += "[";
+  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+    result += std::to_string(player_scores_.at(i)) + ",";
+  }
+  result += "]";
+  result += ",";
+
+  result += "\"currentMoveType\":";
+  result += '"' + moveType2String(current_move_type_) + '"';
+  result += ",";
+
+  result += "\"prevPlayer\":";
+  result += std::to_string(prev_player_);
+  result += ",";
+
+  result += "\"currentPlayer\":";
+  result += std::to_string(current_player_);
+  result += ",";
+
+  result += "\"isNormalOrder?\":";
+  result += std::to_string(is_normal_order_);
+  result += ",";
+
+  result += "\"tableColor\":";
+  result += '"' + color2String(table_color_) + '"';
+  result += ",";
+
+  result += "\"tablePattern\":";
+  result += '"' + cardPattern2String(table_pattern_) + '"';
+  result += ",";
+
+  result += "\"isChallengeValid?\":";
+  result += std::to_string(is_challenge_valid_);
+  result += ",";
+
+  result += "\"drawnCard\":";
+  result += '"' + drawn_card_.toString() + '"';
+  result += ",";
+
+  result += "\"lastMove\":";
+  result += '"' + move2String(last_move_) + '"';
+  result += ",";
+
+  result += "\"addCards\":";
+  result += "[";
+  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+    if (add_cards_.at(i).size() == 0) {
+      result += "\"Empty\"";
+    } else {
+      result += "[";
+      for (const Card card : add_cards_.at(i)) {
+        result += '"' + card.toString() + '"' + ",";
+      }
+      result += "]";
+    }
+    result += ",";
+  }
+  result += "]";
+  result += ",";
+
+  result += "\"subCards\":";
+  result += "[";
+  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
+    if (sub_cards_.at(i).size() == 0) {
+      result += "\"Empty\"";
+    } else {
+      result += "[";
+      for (const Card card : sub_cards_.at(i)) {
+        result += '"' + card.toString() + '"' + ",";
+      }
+      result += "]";
+    }
+    result += ",";
+  }
+  result += "]";
+  
+  result += "}";
 
   return result;
 }

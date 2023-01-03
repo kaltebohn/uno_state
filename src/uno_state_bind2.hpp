@@ -76,6 +76,8 @@ class UnoStateBind2 final : public UnoState {
 
   virtual std::string toString() const;
 
+  virtual std::string toJSON() const;
+
   void print() const override { std::cout << *this; }
 
  private:

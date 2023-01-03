@@ -237,6 +237,8 @@ class UnoState {
 
   virtual std::string toString() const;
 
+  virtual std::string toJSON() const;
+
   virtual void print() const { std::cout << *this; }
 
  protected:
