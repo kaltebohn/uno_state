@@ -40,16 +40,15 @@ UnoState UnoState::next(Move move) const {
 
   if (current_move_type_ == MoveType::kSubmissionOfDrawnCard) {
     state.drawn_card_ = Card{}; // drawn_card_をチャラにする。
-    Submission submission = std::get<Submission>(move);
-    Card card = submission.getCard();
+    Card submission = std::get<Card>(move);
 
-    if (card.isEmpty()) {
+    if (submission.isEmpty()) {
       state.current_move_type_ = MoveType::kSubmission;
       state.prev_player_ = current_player_;
       state.current_player_ = nextPlayer();
       return state;
     } else {
-      if (card != drawn_card_ || !submission.isLegal(table_color_, table_pattern_)) {
+      if (submission != drawn_card_ || !submission.isLegal(table_color_, table_pattern_)) {
         /* 着手が違法なら、ペナルティとして2枚カードを引く。 */
         state.giveCards(current_player_, 2);
         state.current_move_type_ = MoveType::kSubmission;
@@ -57,14 +56,14 @@ UnoState UnoState::next(Move move) const {
         state.current_player_ = nextPlayer();
         return state;
       } else {
-        return nextWhenSubmission(state, std::get<Submission>(move));
+        return nextWhenSubmission(state, std::get<Card>(move));
       }
     }
   }
 
   /* 以下カード提出の場合。 */
-  assert(std::holds_alternative<Submission>(move));
-  return nextWhenSubmission(state, std::get<Submission>(move));
+  assert(std::holds_alternative<Card>(move));
+  return nextWhenSubmission(state, std::get<Card>(move));
 }
 
 UnoState UnoState::nextWhenColorChoice(UnoState& state, const Color color) const {
@@ -158,14 +157,12 @@ UnoState UnoState::nextWhenChallenge(UnoState& state, const ChallengeFlag will_c
   return state;
 }
 
-UnoState UnoState::nextWhenSubmission(UnoState&state, const Submission& submission) const {
-  const Card card = submission.getCard();
-
+UnoState UnoState::nextWhenSubmission(UnoState&state, const Card& submission) const {
   if (!submission.isLegal(table_color_, table_pattern_)) {
     return nextWhenIlligalSubmission(state);
   }
 
-  if (submission.getCard().isEmpty()) {
+  if (submission.isEmpty()) {
     return nextWhenEmptyCardSubmission(state);
   }
 
@@ -173,14 +170,14 @@ UnoState UnoState::nextWhenSubmission(UnoState&state, const Submission& submissi
   state.acceptSubmission(submission);
 
   /* 記号カードでなければここで終わり。 */
-  if (!std::holds_alternative<CardAction>(card.getPattern())) {
+  if (!std::holds_alternative<CardAction>(submission.getPattern())) {
     state.current_move_type_ = MoveType::kSubmission;
     state.current_player_ = nextPlayer();
     state.prev_player_ = current_player_;
     return state;
   }
 
-  const CardAction submission_action = std::get<CardAction>(card.getPattern());
+  const CardAction submission_action = std::get<CardAction>(submission.getPattern());
   if (submission_action == CardAction::kDrawTwo) {
     return nextWhenDrawTwoSubmission(state);
   } else if (submission_action == CardAction::kReverse) {
@@ -218,15 +215,9 @@ UnoState UnoState::nextWhenEmptyCardSubmission(UnoState& state) const {
 }
 
 /* 合法手submissionを現在のプレイヤが出した場合の、カードの効果以外の処理を行う。 */
-void UnoState::acceptSubmission(const Submission& submission) {
+void UnoState::acceptSubmission(const Card& submission) {
   /* カードを場に出し、プレイヤの手札から除く。 */
-  const Card card = submission.getCard();
-  discardCard(current_player_, card);
-
-  /* 合理的なプレイヤはUNO宣言忘れを必ず指摘するので、このクラスでは自動でペナルティを課す。 */
-  if (player_cards_.at(current_player_).size() == 1 && !submission.getShouldYellUNO()) {
-    giveCards(current_player_, 2);
-  }
+  discardCard(current_player_, submission);
 
   /* 上がったプレイヤがいたら点数を付ける。 */
   if (isFinished()) {
@@ -240,26 +231,24 @@ std::vector<Move> UnoState::legalActions() const {
   }
 
   if (current_move_type_ == MoveType::kSubmission) {
-    std::vector<Submission> submissions{legalSubmissions()};
+    std::vector<Card> submissions{legalCards()};
     std::vector<Move> result(submissions.size());
     std::transform(submissions.begin(), submissions.end(), result.begin(),
-        [](Submission submission) {
+        [](Card submission) {
           return (Move)submission;
         });
     return result;
   } else if (current_move_type_ == MoveType::kSubmissionOfDrawnCard) {
-    const bool should_yell_UNO{currentPlayerShouldYellUNO()};
-
     assert(!drawn_card_.isEmpty()); // ここはカードを引いた際に移る処理だから、drawn_card_は空になり得ない。
-    const Submission submission_of_drawn_card{drawn_card_, should_yell_UNO};
-    std::vector<Submission> submissions{Submission{Card{}, should_yell_UNO}};
+    const Card submission_of_drawn_card{drawn_card_};
+    std::vector<Card> submissions{Card{}};
     if (submission_of_drawn_card.isLegal(table_color_, table_pattern_)) {
       submissions.push_back(submission_of_drawn_card);
     }
 
     std::vector<Move> result(submissions.size());
     std::transform(submissions.begin(), submissions.end(), result.begin(),
-        [](Submission submission) {
+        [](Card submission) {
           return (Move)submission;
         });
 
@@ -273,13 +262,11 @@ std::vector<Move> UnoState::legalActions() const {
   assert(false);
 }
 
-std::vector<Submission> UnoState::legalSubmissions() const {
-  const bool should_yell_UNO{currentPlayerShouldYellUNO()};
-  std::vector<Submission> result{{Card{}, false}}; // 空のカードは必ず選択肢に含める。
+std::vector<Card> UnoState::legalCards() const {
+  std::vector<Card> result{Card{}}; // 空のカードは必ず選択肢に含める。
   for (const Card& card : player_cards_.at(current_player_)) {
-    Submission submission{card, should_yell_UNO};
-    if (submission.isLegal(table_color_, table_pattern_)) {
-      result.push_back(submission);
+    if (card.isLegal(table_color_, table_pattern_)) {
+      result.push_back(card);
     }
   }
   return result;

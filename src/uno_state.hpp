@@ -13,7 +13,6 @@
 
 #include "external/xorshift64.hpp"
 #include "card.hpp"
-#include "submission.hpp"
 #include "move.hpp"
 #include "uno_consts.hpp"
 
@@ -261,10 +260,7 @@ class UnoState {
   std::array<Cards, 4> sub_cards_{}; // 状態遷移時に各プレイヤから削除されたカード。最初とシャッフルワイルド時は考えない。  
 
   /* 可能な提出カードの全体を返す。 */
-  virtual std::vector<Submission> legalSubmissions() const;
-
-  /* 現在のプレイヤがUNOを宣言すべきか(プレイヤの手札枚数が2枚か)？ */
-  virtual bool currentPlayerShouldYellUNO() const { return player_cards_.at(current_player_).size() == 2; }
+  virtual std::vector<Card> legalCards() const;
 
   UnoState nextWhenColorChoice(UnoState& state, const Color color) const;
 
@@ -272,7 +268,7 @@ class UnoState {
 
   UnoState nextWhenChallenge(UnoState& state, const ChallengeFlag will_challenge) const;
 
-  UnoState nextWhenSubmission(UnoState& state, const Submission& submission) const;
+  UnoState nextWhenSubmission(UnoState& state, const Card& submission) const;
 
   /* 合法手でなければ2枚引かせて手番を飛ばす。 */
   UnoState nextWhenIlligalSubmission(UnoState& state) const;
@@ -326,7 +322,7 @@ class UnoState {
     const auto legal_moves = legalActions();
     state.is_challenge_valid_ = (std::any_of(legal_moves.begin(), legal_moves.end(),
         [](Move move) {
-          const Card card = std::get<Submission>(move).getCard();
+          const Card card = std::get<Card>(move);
           const CardPattern pattern = card.getPattern();
           return (!card.isEmpty() &&
                   !std::holds_alternative<CardNumber>(pattern)) &&
@@ -355,7 +351,7 @@ class UnoState {
     return state;
   }
 
-  virtual void acceptSubmission(const Submission& submission);
+  virtual void acceptSubmission(const Card& submission);
 
   // TODO: たまに正しく得点を付けられていない気がする。
   virtual void scoreToPlayers() {

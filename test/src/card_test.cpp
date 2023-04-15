@@ -147,3 +147,34 @@ TEST(NotEqualTest, False) {
   Card card4{Color::kBlue, CardAction::kDrawTwo};
   EXPECT_FALSE(card3 != card4);
 }
+
+TEST(IsLegalTest, True) {
+  Card submission1{};
+  EXPECT_TRUE(submission1.isLegal(Color::kBlue, CardNumber::kZero));
+
+  Card submission2{Color::kWild, CardAction::kWild};
+  EXPECT_TRUE(submission2.isLegal(Color::kBlue, CardNumber::kZero));
+
+  Card submission3{Color::kBlue, CardNumber::kZero};
+  EXPECT_TRUE(submission3.isLegal(Color::kBlue, CardNumber::kZero));
+
+  Card submission4{Color::kGreen, CardNumber::kZero};
+  EXPECT_TRUE(submission4.isLegal(Color::kBlue, CardNumber::kZero));
+
+  Card submission5{Color::kBlue, CardNumber::kZero};
+  EXPECT_TRUE(submission5.isLegal(Color::kBlue, CardNumber::kOne));
+
+  Card submission6{Color::kBlue, CardNumber::kZero};
+  EXPECT_TRUE(submission6.isLegal(Color::kBlue, CardAction::kDrawTwo));
+}
+
+TEST(IsLegalTest, False) {
+  Card submission1{Color::kBlue, CardNumber::kZero};
+  EXPECT_FALSE(submission1.isLegal(Color::kGreen, CardNumber::kOne));
+
+  Card submission2{Color::kBlue, CardAction::kDrawTwo};
+  EXPECT_FALSE(submission2.isLegal(Color::kGreen, CardAction::kReverse));
+
+  Card submission3{Color::kBlue, CardNumber::kZero};
+  EXPECT_FALSE(submission3.isLegal(Color::kGreen, CardAction::kReverse));
+}

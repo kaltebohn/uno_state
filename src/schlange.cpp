@@ -4,8 +4,8 @@ Color Schlange::changeColor() const {
   /* 手札中の一番多い色を選ぶ。 */
   int num_of_blue{}, num_of_green{}, num_of_red{}, num_of_yellow{};
 
-  for (const Submission& submission : legal_submissions_) {
-    const Color color{submission.getCard().getColor()};
+  for (const Card& submission : legal_cards_) {
+    const Color color{submission.getColor()};
     switch (color) {
       case Color::kBlue:
         num_of_blue++;
@@ -37,17 +37,17 @@ Color Schlange::changeColor() const {
   }
 }
 
-Submission Schlange::submitCard() const {
-  if (legal_submissions_.size() == 1) { return legal_submissions_.at(0); }
+Card Schlange::submitCard() const {
+  if (legal_cards_.size() == 1) { return legal_cards_.at(0); }
 
-  const std::vector<Submission>& legal_submissions{legal_submissions_};
+  const std::vector<Card>& legal_submissions{legal_cards_};
 
   /* 評価値で重みづけする。 */
   std::vector<int> scores(legal_submissions.size());
   int best_idx{0};
   int best_score{-1000000};
   for (unsigned i = 0; i < legal_submissions.size(); i++) {
-    const Card card{legal_submissions.at(i).getCard()};
+    const Card card{legal_submissions.at(i)};
     if (card.isEmpty()) {
       /* 空のカードは基本的に出さない。 */
       scores.at(i) = -10000;

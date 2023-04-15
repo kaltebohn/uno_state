@@ -22,11 +22,11 @@ class Schlange {
   void setLegalSubmissions() {
     const bool should_yell_UNO{should_yell_UNO_};
 
-    legal_submissions_.clear();
+    legal_cards_.clear();
     for (const Card& card : my_cards_) {
-      Submission submission(card, should_yell_UNO);
+      Card submission{card};
       if (submission.isLegal(table_color_, table_pattern_)) {
-        legal_submissions_.push_back(submission);
+        legal_cards_.push_back(submission);
       }
     }
   }
@@ -34,22 +34,22 @@ class Schlange {
   Color changeColor() const;
 
   bool willPlayDrawnCard(const Card& drawn_card) const {
-    return Submission(drawn_card, should_yell_UNO_).isLegal(table_color_, table_pattern_);
+    return Card(drawn_card).isLegal(table_color_, table_pattern_);
   }
 
   bool willChallenge() const { return false; }
 
-  bool willDraw() const { return legal_submissions_.size() == 0; }
+  bool willDraw() const { return legal_cards_.size() == 0; }
 
   bool shouldYellUNO() const { return should_yell_UNO_; }
 
-  Submission submitCard() const;
+  Card submitCard() const;
 
  private:
   Cards my_cards_{};
   Color table_color_{};
   CardPattern table_pattern_{};
-  std::vector<Submission> legal_submissions_{};
+  std::vector<Card> legal_cards_{};
   bool should_yell_UNO_{};
 };
 

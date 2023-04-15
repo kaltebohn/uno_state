@@ -423,7 +423,7 @@ TEST(StateTransitionTest, SubmissionOfDrawnCard) {
       {Cards{drawn_card}},
       {}
   };
-  UnoState dst_state{src_state.next(Submission(drawn_card, false))};
+  UnoState dst_state{src_state.next(Card(drawn_card))};
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
@@ -498,7 +498,7 @@ TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
       {Cards{drawn_card}},
       {}
   };
-  UnoState dst_state{src_state.next(Submission(drawn_card, false))};
+  UnoState dst_state{src_state.next(Card(drawn_card))};
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
@@ -574,7 +574,7 @@ TEST(StateTransitionTest, EmptySubmissionOfDrawnCard) {
       {},
       {}
   };
-  UnoState dst_state{src_state.next(Submission({}, false))};
+  UnoState dst_state{src_state.next(Card{})};
 
   Cards target_deck{src_deck};
   UnoState target_state{
@@ -641,7 +641,7 @@ TEST(StateTransitionTest, IlligalSubmission) {
       {},
       {Cards{table_card}}
   };
-  UnoState dst_state{src_state.next(Submission(submitted_card, false))};
+  UnoState dst_state{src_state.next(Card(submitted_card))};
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
@@ -714,7 +714,7 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
       {},
       {Cards{table_card}}
   };
-  UnoState dst_state{src_state.next(Submission({}, false))};
+  UnoState dst_state{src_state.next(Card{})};
 
   Card drawn_card{Card::kWildCustomizable};
   Cards target_deck{src_deck};
@@ -789,7 +789,7 @@ TEST(StateTransitionTest, NumberSubmission) {
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
-  UnoState dst_state{src_state.next(Submission(submitted_card, false))};
+  UnoState dst_state{src_state.next(Card(submitted_card))};
 
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
   target_player_cards.at(0).erase(std::find(
@@ -861,7 +861,7 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
       {},
       {Cards{table_card}}
   };
-  UnoState dst_state{src_state.next(Submission(submitted_card, false))};
+  UnoState dst_state{src_state.next(Card(submitted_card))};
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
@@ -940,7 +940,7 @@ TEST(StateTransitionTest, ReverseSubmission) {
       {},
       {Cards{table_card}}
   };
-  UnoState dst_state{src_state.next(Submission(submitted_card, false))};
+  UnoState dst_state{src_state.next(Card(submitted_card))};
 
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
   target_player_cards.at(0).erase(std::find(
@@ -1012,7 +1012,7 @@ TEST(StateTransitionTest, SkipSubmission) {
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
-  UnoState dst_state{src_state.next(Submission(submitted_card, false))};
+  UnoState dst_state{src_state.next(Card(submitted_card))};
 
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
   target_player_cards.at(0).erase(std::find(
@@ -1084,7 +1084,7 @@ TEST(StateTransitionTest, WildSubmission) {
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
-  UnoState dst_state{src_state.next(Submission(submitted_card, false))};
+  UnoState dst_state{src_state.next(Card(submitted_card))};
 
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
   target_player_cards.at(0).erase(std::find(
@@ -1166,7 +1166,7 @@ TEST(StateTransitionTest, WildDraw4Submission) {
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
-  UnoState dst_state{src_state.next(Submission(submitted_card, false))};
+  UnoState dst_state{src_state.next(Card(submitted_card))};
 
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
   target_player_cards.at(0).erase(std::find(
@@ -1238,7 +1238,7 @@ TEST(StateTransitionTest, WildShuffleHandsSubmission) {
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
-  UnoState dst_state{src_state.next(Submission(submitted_card, false))};
+  UnoState dst_state{src_state.next(Card(submitted_card))};
 
   /* シャッフルワイルドを出した後の各プレイヤの手札はランダムに定まるので、着手の型と手札枚数の確認だけする。 */
   /* 他の効果は、他のカードに対するテストで確かめられていると思うことにする。 */
@@ -1303,7 +1303,7 @@ TEST(StateTransitionTest, AlreadyFinished) {
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
-  UnoState dst_state{src_state.next(Submission(submitted_card, false))};
+  UnoState dst_state{src_state.next(Card(submitted_card))};
 
   EXPECT_EQ(dst_state, src_state);
 }
@@ -1451,8 +1451,8 @@ TEST(LegalMovesTest, SubmissionOfDrawnCard) {
   auto legal_moves = state.legalMoves();
 
   EXPECT_EQ(legal_moves.size(), 2);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{Card{}, false}), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{drawn_card, false}), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Card{}), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(drawn_card), legal_moves.end());
 }
 
 /*
@@ -1500,7 +1500,7 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardNothing) {
   auto legal_moves = state.legalMoves();
 
   EXPECT_EQ(legal_moves.size(), 1);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{{}, false}), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card{})), legal_moves.end());
 }
 
 /*
@@ -1548,7 +1548,7 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardOnUNO) {
   auto legal_moves = state.legalMoves();
 
   EXPECT_EQ(legal_moves.size(), 2);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{drawn_card, true}), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(drawn_card)), legal_moves.end());
 }
 
 /*
@@ -1595,9 +1595,9 @@ TEST(LegalMovesTest, SubmissionMultiple) {
   auto legal_moves = state.legalMoves();
 
   EXPECT_EQ(legal_moves.size(), 4);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{Card::kBlueOne, false}), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{Card::kBlueDrawTwo, false}), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{Card::kGreenZero, false}), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kBlueOne)), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kBlueDrawTwo)), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kGreenZero)), legal_moves.end());
 }
 
 /*
@@ -1644,8 +1644,8 @@ TEST(LegalMovesTest, SubmissionMultipleOnUno) {
   auto legal_moves = state.legalMoves();
 
   EXPECT_EQ(legal_moves.size(), 3);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{Card::kBlueOne, true}), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{Card::kBlueDrawTwo, true}), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kBlueOne)), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kBlueDrawTwo)), legal_moves.end());
 }
 
 /*
@@ -1692,7 +1692,7 @@ TEST(LegalMovesTest, SubmissionNothing) {
   auto legal_moves = state.legalMoves();
 
   EXPECT_EQ(legal_moves.size(), 1);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Submission{{}, false}), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card{})), legal_moves.end());
 }
 
 /*
@@ -1862,7 +1862,7 @@ TEST(GetScoreTest, Number) {
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
-  state = state.next(Submission(submitted_card, false));
+  state = state.next(submitted_card);
 
   EXPECT_EQ(state.getScore(0), 46);
   EXPECT_EQ(state.getScore(1), -1);
@@ -1912,7 +1912,7 @@ TEST(GetScoreTest, Action) {
       {},
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
-  state = state.next(Submission(submitted_card, false));
+  state = state.next(submitted_card);
 
   EXPECT_EQ(state.getScore(0), 310);
   EXPECT_EQ(state.getScore(1), -50);

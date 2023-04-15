@@ -3,10 +3,10 @@
 
 #include <variant>
 
-#include "submission.hpp"
+#include "card.hpp"
 
 using ChallengeFlag = bool;
-using Move = std::variant<std::monostate, Submission, Color, ChallengeFlag>;
+using Move = std::variant<std::monostate, Card, Color, ChallengeFlag>;
 
 std::string move2String(const Move move);
 

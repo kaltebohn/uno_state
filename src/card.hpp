@@ -60,6 +60,13 @@ class Card {
     return os;
   }
 
+  /* このカードが場に対して合法か？ワイルドドロー4を反則で出す場合も合法として扱う。 */
+  bool isLegal(Color table_color, CardPattern table_pattern) const {
+    if (color_ == Color::kNull || color_ == Color::kWild) { return true; }
+
+    return color_ == table_color || pattern_ == table_pattern;
+  }
+
   constexpr Card() = default;
 
   constexpr Card(const Color c, const CardPattern p) : color_(c), pattern_(p) {}

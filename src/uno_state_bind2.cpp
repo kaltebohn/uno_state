@@ -5,9 +5,9 @@ UnoStateBind2 UnoStateBind2::next(const Move& move) const {
   if (isFinished()) { return *this; }
 
   /* 白いワイルドが出ている場合、その効果処理だけして返す。 */
-  if (std::holds_alternative<Submission>(move) &&
-      (std::get<Submission>(move).getCard() == Card::kWildCustomizable)) {
-    const Submission submission{std::get<Submission>(move)};
+  if (std::holds_alternative<Card>(move) &&
+      (std::get<Card>(move) == Card::kWildCustomizable)) {
+    const Card submission{std::get<Card>(move)};
     UnoStateBind2 state{*this};
 
     state.last_move_ = move;

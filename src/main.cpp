@@ -12,10 +12,10 @@ Move nextMoveOfPlayer(Schlange& player, const int player_num, const UnoStateBind
       player.setTableColor(state.getTableColor());
       player.setTablePattern(state.getTablePattern());
       player.setLegalSubmissions();
-      return (player.willDraw()) ? (Move)(Submission(Card(), false)) : (Move)(player.submitCard());
+      return (player.willDraw()) ? (Move)(Card()) : (Move)(player.submitCard());
     case MoveType::kSubmissionOfDrawnCard:
       return (player.willPlayDrawnCard(state.getDrawnCard())) ?
-          (Move)(Submission(state.getDrawnCard(), player.shouldYellUNO())) : (Move)(Submission());
+          (Move)(Card(state.getDrawnCard())) : (Move)(Card());
     default:
       assert(false);
   }
