@@ -147,7 +147,7 @@ std::string UnoStateBind2::toJSON() const {
   result += std::to_string(current_player_);
   result += ",";
 
-  result += "\"isNormalOrder?\":";
+  result += "\"isNormalOrder\":";
   result += std::to_string(is_normal_order_);
   result += ",";
 
@@ -159,7 +159,7 @@ std::string UnoStateBind2::toJSON() const {
   result += '"' + cardPattern2String(table_pattern_) + '"';
   result += ",";
 
-  result += "\"isChallengeValid?\":";
+  result += "\"isChallengeValid\":";
   result += std::to_string(is_challenge_valid_);
   result += ",";
 

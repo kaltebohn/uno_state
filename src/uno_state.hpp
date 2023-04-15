@@ -179,7 +179,7 @@ class UnoState {
   UnoState next(Move move) const;
 
   /* 合法着手の全体を返す。 */
-  virtual std::vector<Move> legalMoves() const;
+  virtual std::vector<Move> legalActions() const;
 
   /* ゲームが終了しているか？ */
   virtual bool isFinished() const {
@@ -199,7 +199,7 @@ class UnoState {
   Color getTableColor() const { return table_color_; }
   CardPattern getTablePattern() const { return table_pattern_; }
   Card getDrawnCard() const { return drawn_card_; }
-  Move getLastMove() const { return last_move_; }
+  Move getLastAction() const { return last_move_; }
   Cards getAddCards(const int player_num) const { return add_cards_.at(player_num); }
   Cards getSubCards(const int player_num) const { return sub_cards_.at(player_num); }
 
@@ -323,7 +323,7 @@ class UnoState {
   /* 共通処理を実施した状態に、ワイルドドロー4の効果を反映させる。 */
   UnoState nextWhenWildDraw4Submission(UnoState& state) const {
     state.current_move_type_ = MoveType::kColorChoice;
-    const auto legal_moves = legalMoves();
+    const auto legal_moves = legalActions();
     state.is_challenge_valid_ = (std::any_of(legal_moves.begin(), legal_moves.end(),
         [](Move move) {
           const Card card = std::get<Submission>(move).getCard();

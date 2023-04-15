@@ -234,7 +234,7 @@ void UnoState::acceptSubmission(const Submission& submission) {
   }
 }
 
-std::vector<Move> UnoState::legalMoves() const {
+std::vector<Move> UnoState::legalActions() const {
   if (isFinished()) {
     return {};
   }
