@@ -10,7 +10,6 @@ class Schlange {
   void setMyCards(const Cards& cards) {
     my_cards_.clear();
     std::copy(cards.begin(), cards.end(), std::back_inserter(my_cards_));
-    should_yell_UNO_ = my_cards_.size() == 2;
   }
 
   void setTableColor(const Color color) { table_color_ = color; }
@@ -20,8 +19,6 @@ class Schlange {
   /* 合法手を列挙して保存。 */
   /* Schlangeでは出せるカードがあるときにパスをしないので、空のカードは含めない。 */
   void setLegalSubmissions() {
-    const bool should_yell_UNO{should_yell_UNO_};
-
     legal_cards_.clear();
     for (const Card& card : my_cards_) {
       Card submission{card};
@@ -41,8 +38,6 @@ class Schlange {
 
   bool willDraw() const { return legal_cards_.size() == 0; }
 
-  bool shouldYellUNO() const { return should_yell_UNO_; }
-
   Card submitCard() const;
 
  private:
@@ -50,7 +45,6 @@ class Schlange {
   Color table_color_{};
   CardPattern table_pattern_{};
   std::vector<Card> legal_cards_{};
-  bool should_yell_UNO_{};
 };
 
 #endif // SCHLANGE_HPP_
