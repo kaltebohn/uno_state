@@ -6,7 +6,7 @@
   状態遷移テスト。チャレンジができる状態で、チャレンジをしない場合。
   前状態: 前プレイヤがワイルドドロー4を出した。
   着手: チャレンジしない。
-  次状態: 現プレイヤが山札から4枚引いて、次プレイヤに手番が移る。 
+  次状態: 現プレイヤが山札から4枚引いて、次プレイヤに手番が移る。
 */
 TEST(StateTransitionTest, NotChallenge) {
   Card table_card{Card::kWildDraw4};
@@ -83,7 +83,7 @@ TEST(StateTransitionTest, NotChallenge) {
   状態遷移テスト。チャレンジができる状態で、チャレンジをして失敗した場合。
   前状態: 前プレイヤがワイルドドロー4を出した。
   着手: チャレンジする。
-  次状態: チャレンジフラグを戻し、現プレイヤが山札から6枚引いて、次プレイヤに手番が移る。 
+  次状態: チャレンジフラグを戻し、現プレイヤが山札から6枚引いて、次プレイヤに手番が移る。
 */
 TEST(StateTransitionTest, ChallengeFailed) {
   Card table_card{Card::kWildDraw4};
@@ -162,7 +162,7 @@ TEST(StateTransitionTest, ChallengeFailed) {
   状態遷移テスト。チャレンジができる状態で、チャレンジをして成功した場合。
   前状態: 前プレイヤがワイルドドロー4を出した。
   着手: チャレンジする。
-  次状態: チャレンジフラグを戻し、前プレイヤが山札から4枚引いて、ワイルドドロー4を前プレイヤの手札に戻し、前プレイヤに手番が移る。 
+  次状態: チャレンジフラグを戻し、前プレイヤが山札から4枚引いて、ワイルドドロー4を前プレイヤの手札に戻し、前プレイヤに手番が移る。
 */
 TEST(StateTransitionTest, ChallengeSucceeded) {
   Card table_card{Card::kWildDraw4};
@@ -1349,7 +1349,7 @@ TEST(LegalMovesTest, ColorChoice) {
       {Cards{table_card}}
   };
 
-  auto legal_moves = state.legalMoves();
+  auto legal_moves = state.legalActions();
 
   EXPECT_EQ(legal_moves.size(), 4);
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Color::kBlue), legal_moves.end());
@@ -1399,7 +1399,7 @@ TEST(LegalMovesTest, Challenge) {
       {Cards{table_card}}
   };
 
-  auto legal_moves = state.legalMoves();
+  auto legal_moves = state.legalActions();
 
   EXPECT_EQ(legal_moves.size(), 2);
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)true), legal_moves.end());
@@ -1448,11 +1448,11 @@ TEST(LegalMovesTest, SubmissionOfDrawnCard) {
       {}
   };
 
-  auto legal_moves = state.legalMoves();
+  auto legal_moves = state.legalActions();
 
   EXPECT_EQ(legal_moves.size(), 2);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Card{}), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(drawn_card), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card{})), legal_moves.end());
+  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(drawn_card)), legal_moves.end());
 }
 
 /*
@@ -1497,7 +1497,7 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardNothing) {
       {}
   };
 
-  auto legal_moves = state.legalMoves();
+  auto legal_moves = state.legalActions();
 
   EXPECT_EQ(legal_moves.size(), 1);
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card{})), legal_moves.end());
@@ -1545,7 +1545,7 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardOnUNO) {
       {}
   };
 
-  auto legal_moves = state.legalMoves();
+  auto legal_moves = state.legalActions();
 
   EXPECT_EQ(legal_moves.size(), 2);
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(drawn_card)), legal_moves.end());
@@ -1592,7 +1592,7 @@ TEST(LegalMovesTest, SubmissionMultiple) {
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
-  auto legal_moves = state.legalMoves();
+  auto legal_moves = state.legalActions();
 
   EXPECT_EQ(legal_moves.size(), 4);
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kBlueOne)), legal_moves.end());
@@ -1641,7 +1641,7 @@ TEST(LegalMovesTest, SubmissionMultipleOnUno) {
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
-  auto legal_moves = state.legalMoves();
+  auto legal_moves = state.legalActions();
 
   EXPECT_EQ(legal_moves.size(), 3);
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kBlueOne)), legal_moves.end());
@@ -1689,7 +1689,7 @@ TEST(LegalMovesTest, SubmissionNothing) {
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
-  auto legal_moves = state.legalMoves();
+  auto legal_moves = state.legalActions();
 
   EXPECT_EQ(legal_moves.size(), 1);
   EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card{})), legal_moves.end());
@@ -1957,7 +1957,7 @@ TEST(GetCurrentPlayerNum, Normal) {
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
-  auto legal_moves = state.legalMoves();
+  auto legal_moves = state.legalActions();
 
   EXPECT_EQ(state.getCurrentPlayerNum(), 1);
 }
@@ -1999,7 +1999,7 @@ TEST(GetPlayerCards, Normal) {
       {Cards(), Cards(), Cards(), Cards{table_card}}
   };
 
-  auto legal_moves = state.legalMoves();
+  auto legal_moves = state.legalActions();
 
   for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
     const auto cards = state.getPlayerCards(i);
