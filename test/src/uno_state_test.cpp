@@ -10,8 +10,10 @@
 */
 TEST(StateTransitionTest, NotChallenge) {
   Card table_card{Card::kWildDraw4};
+  Card prev_table_card{Card::kYellowZero};
   Cards src_deck{allCards()};
   src_deck.erase(std::find(src_deck.begin(), src_deck.end(), table_card));
+  src_deck.erase(std::find(src_deck.begin(), src_deck.end(), prev_table_card));
 
   std::array<Cards, UnoConsts::kNumOfPlayers> src_player_cards{{
       {{Card::kBlueOne}},
@@ -27,7 +29,7 @@ TEST(StateTransitionTest, NotChallenge) {
 
   UnoState src_state{
       src_deck,
-      Cards{Card::kYellowZero, table_card},
+      Cards{prev_table_card, table_card},
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
@@ -36,9 +38,7 @@ TEST(StateTransitionTest, NotChallenge) {
       0,
       true,
       Color::kBlue,
-      table_card.getPattern(),
-      true,
-      Move(),
+      CardAction::kWildDraw4,
       XorShift64()
   };
   UnoState dst_state{src_state.next(false)};
@@ -55,7 +55,7 @@ TEST(StateTransitionTest, NotChallenge) {
   target_deck.erase(target_deck.end() - 4, target_deck.end());
   UnoState target_state{
       target_deck,
-      Cards{Card::kYellowZero, table_card},
+      Cards{prev_table_card, table_card},
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
@@ -64,9 +64,7 @@ TEST(StateTransitionTest, NotChallenge) {
       1,
       true,
       Color::kBlue,
-      table_card.getPattern(),
-      false,
-      Move(),
+      CardAction::kWildDraw4,
       XorShift64()
   };
 
@@ -81,8 +79,10 @@ TEST(StateTransitionTest, NotChallenge) {
 */
 TEST(StateTransitionTest, ChallengeFailed) {
   Card table_card{Card::kWildDraw4};
+  Card prev_table_card{Card::kBlueZero};
   Cards src_deck{allCards()};
   src_deck.erase(std::find(src_deck.begin(), src_deck.end(), table_card));
+  src_deck.erase(std::find(src_deck.begin(), src_deck.end(), prev_table_card));
 
   std::array<Cards, UnoConsts::kNumOfPlayers> src_player_cards{{
       {{Card::kBlueOne}},
@@ -98,7 +98,7 @@ TEST(StateTransitionTest, ChallengeFailed) {
 
   UnoState src_state{
       src_deck,
-      Cards{Card::kBlueZero, table_card},
+      Cards{prev_table_card, table_card},
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
@@ -107,9 +107,7 @@ TEST(StateTransitionTest, ChallengeFailed) {
       0,
       true,
       Color::kBlue,
-      table_card.getPattern(),
-      false,
-      Move(),
+      CardAction::kWildDraw4,
       XorShift64()
   };
   UnoState dst_state{src_state.next(true)};
@@ -128,7 +126,7 @@ TEST(StateTransitionTest, ChallengeFailed) {
   target_deck.erase(target_deck.end() - 6, target_deck.end());
   UnoState target_state{
       target_deck,
-      Cards{Card::kBlueZero, table_card},
+      Cards{prev_table_card, table_card},
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
@@ -137,9 +135,7 @@ TEST(StateTransitionTest, ChallengeFailed) {
       1,
       true,
       Color::kBlue,
-      table_card.getPattern(),
-      false,
-      Move(),
+      CardAction::kWildDraw4,
       XorShift64()
   };
 
@@ -154,8 +150,10 @@ TEST(StateTransitionTest, ChallengeFailed) {
 */
 TEST(StateTransitionTest, ChallengeSucceeded) {
   Card table_card{Card::kWildDraw4};
+  Card prev_table_card{Card::kYellowZero};
   Cards src_deck{allCards()};
   src_deck.erase(std::find(src_deck.begin(), src_deck.end(), table_card));
+  src_deck.erase(std::find(src_deck.begin(), src_deck.end(), prev_table_card));
 
   std::array<Cards, UnoConsts::kNumOfPlayers> src_player_cards{{
       {{Card::kBlueOne}},
@@ -171,7 +169,7 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
 
   UnoState src_state{
       src_deck,
-      Cards{Card::kYellowZero, table_card},
+      Cards{prev_table_card, table_card},
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
@@ -180,9 +178,7 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
       0,
       true,
       Color::kBlue,
-      table_card.getPattern(),
-      true,
-      Move(),
+      CardAction::kWildDraw4,
       XorShift64()
   };
   UnoState dst_state{src_state.next(true)};
@@ -200,7 +196,7 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
   target_deck.erase(target_deck.end() - 4, target_deck.end());
   UnoState target_state{
       target_deck,
-      Cards{Card::kYellowZero},
+      Cards{prev_table_card},
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
@@ -210,8 +206,6 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
       true,
       Color::kYellow,
       CardNumber::kZero,
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -253,8 +247,6 @@ TEST(StateTransitionTest, ColorChoice) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Color::kBlue)};
@@ -271,8 +263,6 @@ TEST(StateTransitionTest, ColorChoice) {
       true,
       Color::kBlue,
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -314,8 +304,6 @@ TEST(StateTransitionTest, IlligalColorChoice) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Color::kWild)};
@@ -341,8 +329,6 @@ TEST(StateTransitionTest, IlligalColorChoice) {
       true,
       Color::kBlue,
       CardPattern(CardNumber::kZero),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -386,8 +372,6 @@ TEST(StateTransitionTest, SubmissionOfDrawnCard) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card(drawn_card))};
@@ -411,8 +395,6 @@ TEST(StateTransitionTest, SubmissionOfDrawnCard) {
       true,
       drawn_card.getColor(),
       drawn_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -455,8 +437,6 @@ TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card(drawn_card))};
@@ -481,8 +461,6 @@ TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -525,8 +503,6 @@ TEST(StateTransitionTest, EmptySubmissionOfDrawnCard) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card{})};
@@ -544,8 +520,6 @@ TEST(StateTransitionTest, EmptySubmissionOfDrawnCard) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -586,8 +560,6 @@ TEST(StateTransitionTest, IlligalSubmission) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card(submitted_card))};
@@ -612,8 +584,6 @@ TEST(StateTransitionTest, IlligalSubmission) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -653,8 +623,6 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card{})};
@@ -680,8 +648,6 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -722,8 +688,6 @@ TEST(StateTransitionTest, NumberSubmission) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card(submitted_card))};
@@ -746,8 +710,6 @@ TEST(StateTransitionTest, NumberSubmission) {
       true,
       submitted_card.getColor(),
       submitted_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -788,8 +750,6 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card(submitted_card))};
@@ -819,8 +779,6 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
       true,
       submitted_card.getColor(),
       submitted_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -861,8 +819,6 @@ TEST(StateTransitionTest, ReverseSubmission) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card(submitted_card))};
@@ -885,8 +841,6 @@ TEST(StateTransitionTest, ReverseSubmission) {
       false,
       submitted_card.getColor(),
       submitted_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -927,8 +881,6 @@ TEST(StateTransitionTest, SkipSubmission) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card(submitted_card))};
@@ -951,8 +903,6 @@ TEST(StateTransitionTest, SkipSubmission) {
       true,
       submitted_card.getColor(),
       submitted_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -993,8 +943,6 @@ TEST(StateTransitionTest, WildSubmission) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card(submitted_card))};
@@ -1017,8 +965,6 @@ TEST(StateTransitionTest, WildSubmission) {
       true,
       submitted_card.getColor(),
       submitted_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1069,8 +1015,6 @@ TEST(StateTransitionTest, WildDraw4Submission) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card(submitted_card))};
@@ -1093,8 +1037,6 @@ TEST(StateTransitionTest, WildDraw4Submission) {
       true,
       submitted_card.getColor(),
       submitted_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1135,8 +1077,6 @@ TEST(StateTransitionTest, WildShuffleHandsSubmission) {
       true,
       submitted_card.getColor(),
       submitted_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card(submitted_card))};
@@ -1197,8 +1137,6 @@ TEST(StateTransitionTest, AlreadyFinished) {
       true,
       submitted_card.getColor(),
       submitted_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   UnoState dst_state{src_state.next(Card(submitted_card))};
@@ -1239,8 +1177,6 @@ TEST(LegalMovesTest, ColorChoice) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1286,8 +1222,6 @@ TEST(LegalMovesTest, Challenge) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1332,8 +1266,6 @@ TEST(LegalMovesTest, SubmissionOfDrawnCard) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1378,8 +1310,6 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardNothing) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1423,8 +1353,6 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardOnUNO) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1467,8 +1395,6 @@ TEST(LegalMovesTest, SubmissionMultiple) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1513,8 +1439,6 @@ TEST(LegalMovesTest, SubmissionMultipleOnUno) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1558,8 +1482,6 @@ TEST(LegalMovesTest, SubmissionNothing) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1606,8 +1528,6 @@ TEST(IsFinishedTest, True) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1643,8 +1563,6 @@ TEST(IsFinishedTest, False) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1680,8 +1598,6 @@ TEST(GetScoreTest, NotFinished) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1720,8 +1636,6 @@ TEST(GetScoreTest, Number) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   state = state.next(submitted_card);
@@ -1767,8 +1681,6 @@ TEST(GetScoreTest, Action) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
   state = state.next(submitted_card);
@@ -1808,8 +1720,6 @@ TEST(GetCurrentPlayerNum, Normal) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 
@@ -1847,8 +1757,6 @@ TEST(GetPlayerCards, Normal) {
       true,
       table_card.getColor(),
       table_card.getPattern(),
-      false,
-      Move(),
       XorShift64()
   };
 

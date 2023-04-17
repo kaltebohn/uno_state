@@ -10,7 +10,6 @@ UnoStateBind2 UnoStateBind2::next(const Move& move) const {
     const Card submission{std::get<Card>(move)};
     UnoStateBind2 state{*this};
 
-    state.last_move_ = move;
     state.acceptSubmission(submission);
     return nextWhenWildCustomizableSubmission(state);
   }
@@ -157,14 +156,6 @@ std::string UnoStateBind2::toJSON() const {
 
   result += "\"tablePattern\":";
   result += '"' + cardPattern2String(table_pattern_) + '"';
-  result += ",";
-
-  result += "\"isChallengeValid\":";
-  result += std::to_string(is_challenge_valid_);
-  result += ",";
-
-  result += "\"lastMove\":";
-  result += '"' + move2String(last_move_) + '"';
   result += ",";
 
   result += "\"boundPlayer\":";

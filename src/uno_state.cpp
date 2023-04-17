@@ -22,8 +22,6 @@ UnoState UnoState::next(Move move) const {
   /* 自分のコピー。こいつの状態をどんどん書き換えて次状態にし、返す。 */
   UnoState state{*this};
 
-  state.last_move_ = move;
-
   /* カードの効果に関する処理はすべてkSubmissionのときに行う。 */
   /* 他のイベントでは、着手への対応と現在プレイヤの変更だけする。 */
   if (current_move_type_ == MoveType::kColorChoice) {
@@ -112,8 +110,6 @@ UnoState UnoState::nextWhenChallenge(UnoState& state, const ChallengeFlag will_c
 
   /* チャレンジしなかった場合、今のプレイヤに4枚引かせる。 */
   if (!will_challenge) {
-    state.is_challenge_valid_ = false; // フラグを戻す。
-
     /* 次のプレイヤに手番を移す。 */
     state.prev_player_ = challenging_player;
     state.current_player_ = nextPlayerOf(challenging_player);
@@ -123,10 +119,18 @@ UnoState UnoState::nextWhenChallenge(UnoState& state, const ChallengeFlag will_c
     return state;
   }
 
-  /* チャレンジが成功した場合、前のプレイヤが出したカードを戻し、4枚引かせ、手番を戻す。 */
-  if (is_challenge_valid_) {
-    state.is_challenge_valid_ = false; // フラグを戻す。
+  /* チャレンジ成功判定。 */
+  const Card& prev_table_card{discards_.at(discards_.size() - 2)};
+  const bool is_challenge_valid = std::any_of(player_cards_.at(prev_player_).begin(), player_cards_.at(prev_player_).end(),
+      [&prev_table_card](Card card) {
+        return (!card.isEmpty() &&
+                card.isLegal(prev_table_card.getColor(), prev_table_card.getPattern()) &&
+                    (std::holds_alternative<CardNumber>(card.getPattern()) ||
+                    std::get<CardAction>(card.getPattern()) != CardAction::kWildDraw4));
+      });
 
+  /* チャレンジが成功した場合、前のプレイヤが出したカードを戻し、4枚引かせ、手番を戻す。 */
+  if (is_challenge_valid) {
     /* 前のプレイヤのターンに戻す。 */
     state.current_player_ = challenged_player;
     state.prev_player_ = challenging_player;
@@ -349,16 +353,6 @@ std::string UnoState::toString() const {
   result += cardPattern2String(table_pattern_);
   result += "\n";
 
-  result += "IsChallengeValid?\n";
-  result += "  ";
-  result += std::to_string(is_challenge_valid_);
-  result += "\n";
-
-  result += "LastMove\n";
-  result += "  ";
-  result += move2String(last_move_);;
-  result += "\n";
-
   return result;
 }
 
@@ -445,13 +439,6 @@ std::string UnoState::toJSON() const {
   result += "\"tablePattern\":";
   result += '"' + cardPattern2String(table_pattern_) + '"';
   result += ",";
-
-  result += "\"isChallengeValid?\":";
-  result += std::to_string(is_challenge_valid_);
-  result += ",";
-
-  result += "\"lastMove\":";
-  result += '"' + move2String(last_move_) + '"';
 
   result += "}";
 

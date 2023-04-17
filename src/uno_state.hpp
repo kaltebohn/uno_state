@@ -39,8 +39,7 @@ class UnoState {
         current_player_(),
         is_normal_order_(),
         table_color_(),
-        table_pattern_(),
-        is_challenge_valid_() {}
+        table_pattern_() {}
 
   /* ゲーム開始用。 */
   UnoState(const Cards& first_deck, XorShift64::result_type random_seed = 0, Card first_table_card = {})
@@ -54,8 +53,7 @@ class UnoState {
         current_player_(-1),
         is_normal_order_(true),
         table_color_(),
-        table_pattern_(),
-        is_challenge_valid_() {
+        table_pattern_() {
     /* 乱数エンジンをセット。 */
     if (random_seed == 0) {
       std::random_device seed_gen;
@@ -140,8 +138,6 @@ class UnoState {
            bool is_normal_order,
            Color table_color,
            CardPattern table_pattern,
-           bool is_challenge_valid,
-           Move last_move,
            XorShift64 random_engine
            )
       : deck_(deck),
@@ -155,8 +151,6 @@ class UnoState {
         is_normal_order_(is_normal_order),
         table_color_(table_color),
         table_pattern_(table_pattern),
-        is_challenge_valid_(is_challenge_valid),
-        last_move_(last_move),
         random_engine_(random_engine)
   {}
 
@@ -204,7 +198,6 @@ class UnoState {
   bool getIsNormalOrder() const { return is_normal_order_; }
   Color getTableColor() const { return table_color_; }
   CardPattern getTablePattern() const { return table_pattern_; }
-  Move getLastAction() const { return last_move_; }
 
   std::array<int, UnoConsts::kNumOfPlayers> getQuantityOfPlayerCards() const {
     std::array<int, UnoConsts::kNumOfPlayers> result{};
@@ -230,7 +223,6 @@ class UnoState {
     if (state.is_normal_order_ != is_normal_order_) { return false; }
     if (state.table_color_ != table_color_) { return false; }
     if (state.table_pattern_ != table_pattern_) { return false; }
-    if (state.is_challenge_valid_ != is_challenge_valid_) { return false; }
 
     return true;
   }
@@ -253,8 +245,6 @@ class UnoState {
   bool is_normal_order_;
   Color table_color_;
   CardPattern table_pattern_;
-  bool is_challenge_valid_;
-  Move last_move_{};
   XorShift64 random_engine_;
 
   /* 可能な提出カードの全体を返す。 */
@@ -318,14 +308,6 @@ class UnoState {
   UnoState nextWhenWildDraw4Submission(UnoState& state) const {
     state.current_move_type_ = MoveType::kColorChoice;
     const auto legal_moves = legalActions();
-    state.is_challenge_valid_ = (std::any_of(legal_moves.begin(), legal_moves.end(),
-        [](Move move) {
-          const Card card = std::get<Card>(move);
-          const CardPattern pattern = card.getPattern();
-          return (!card.isEmpty() &&
-                  !std::holds_alternative<CardNumber>(pattern)) &&
-                  (std::get<CardAction>(pattern) != CardAction::kWildDraw4);
-        }));
     return state;
   }
 

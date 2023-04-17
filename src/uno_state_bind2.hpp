@@ -34,8 +34,6 @@ class UnoStateBind2 final : public UnoState {
                 const bool is_normal_order,
                 const Color table_color,
                 const CardPattern table_pattern,
-                const bool is_challenge_valid,
-                const Move last_move,
                 const XorShift64 random_engine,
                 const int bound_player,
                 const int bound_turn)
@@ -50,8 +48,6 @@ class UnoStateBind2 final : public UnoState {
                            is_normal_order,
                            table_color,
                            table_pattern,
-                           is_challenge_valid,
-                           last_move,
                            random_engine),
         bound_player_(bound_player),
         bound_turn_(bound_turn)
