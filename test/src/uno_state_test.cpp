@@ -45,13 +45,6 @@ TEST(StateTransitionTest, NotChallenge) {
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  Cards target_add_cards{
-      Card::kWildCustomizable,
-      Card::kWildCustomizable,
-      Card::kWildCustomizable,
-      Card::kWildShuffleHands
-  };
-  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
   target_deck.erase(target_deck.end() - 4, target_deck.end());
   UnoState target_state{
       target_deck,
@@ -114,15 +107,6 @@ TEST(StateTransitionTest, ChallengeFailed) {
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  Cards target_add_cards{
-      Card::kWildCustomizable,
-      Card::kWildCustomizable,
-      Card::kWildCustomizable,
-      Card::kWildShuffleHands,
-      Card::kWildDraw4,
-      Card::kWildDraw4
-  };
-  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
   target_deck.erase(target_deck.end() - 6, target_deck.end());
   UnoState target_state{
       target_deck,
@@ -185,14 +169,6 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  Cards target_add_cards{
-      Card::kWildDraw4,
-      Card::kWildCustomizable,
-      Card::kWildCustomizable,
-      Card::kWildCustomizable,
-      Card::kWildShuffleHands
-  };
-  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(3)));
   target_deck.erase(target_deck.end() - 4, target_deck.end());
   UnoState target_state{
       target_deck,
@@ -310,12 +286,6 @@ TEST(StateTransitionTest, IlligalColorChoice) {
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  Cards target_add_cards{
-      table_card,
-      Card::kWildCustomizable,
-      Card::kWildCustomizable,
-  };
-  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
   target_deck.erase(target_deck.end() - 2, target_deck.end());
   UnoState target_state{
       target_deck,
@@ -443,11 +413,6 @@ TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  Cards target_add_cards{
-      Card::kWildCustomizable,
-      Card::kWildCustomizable
-  };
-  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
   target_deck.erase(target_deck.end() - 2, target_deck.end());
   UnoState target_state{
       target_deck,
@@ -566,11 +531,6 @@ TEST(StateTransitionTest, IlligalSubmission) {
 
   Cards target_deck{src_deck};
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  Cards target_add_cards{
-      Card::kWildCustomizable,
-      Card::kWildCustomizable
-  };
-  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
   target_deck.erase(target_deck.end() - 2, target_deck.end());
   UnoState target_state{
       target_deck,
@@ -631,10 +591,6 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
   Cards target_deck{src_deck};
   target_deck.erase(std::find(target_deck.begin(), target_deck.end(), drawn_card));
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
-  Cards target_add_cards{
-    Card::kWildCustomizable
-  };
-  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(0)));
   target_deck.erase(target_deck.end() - 1, target_deck.end());
   UnoState target_state{
       target_deck,
@@ -761,11 +717,6 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
     target_player_cards.at(0).end(),
     submitted_card
   ));
-  Cards target_add_cards{
-      Card::kWildCustomizable,
-      Card::kWildCustomizable
-  };
-  std::copy(target_add_cards.begin(), target_add_cards.end(), std::back_inserter(target_player_cards.at(1)));
   target_deck.erase(target_deck.end() - 2, target_deck.end());
   UnoState target_state{
       target_deck,
