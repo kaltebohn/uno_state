@@ -167,44 +167,6 @@ std::string UnoStateBind2::toJSON() const {
   result += '"' + move2String(last_move_) + '"';
   result += ",";
 
-  result += "\"addCards\":";
-  result += "[";
-  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-    if (add_cards_.at(i).size() == 0) {
-      result += "\"Empty\"";
-    } else {
-      result += "[";
-      for (const Card card : add_cards_.at(i)) {
-        result += '"' + card.toString() + '"' + ",";
-      }
-      result.pop_back();
-      result += "]";
-    }
-    result += ",";
-  }
-  result.pop_back();
-  result += "]";
-  result += ",";
-
-  result += "\"subCards\":";
-  result += "[";
-  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-    if (sub_cards_.at(i).size() == 0) {
-      result += "\"Empty\"";
-    } else {
-      result += "[";
-      for (const Card card : sub_cards_.at(i)) {
-        result += '"' + card.toString() + '"' + ",";
-      }
-      result.pop_back();
-      result += "]";
-    }
-    result += ",";
-  }
-  result.pop_back();
-  result += "]";
-  result += ",";
-
   result += "\"boundPlayer\":";
   result += std::to_string(bound_player_);
   result += ",";

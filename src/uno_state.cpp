@@ -24,10 +24,6 @@ UnoState UnoState::next(Move move) const {
 
   state.last_move_ = move;
 
-  /* 現状態に遷移する際発生した各プレイヤの手札の差分をリセット。 */
-  state.add_cards_.fill({});
-  state.sub_cards_.fill({});
-
   /* カードの効果に関する処理はすべてkSubmissionのときに行う。 */
   /* 他のイベントでは、着手への対応と現在プレイヤの変更だけする。 */
   if (current_move_type_ == MoveType::kColorChoice) {
@@ -363,33 +359,6 @@ std::string UnoState::toString() const {
   result += move2String(last_move_);;
   result += "\n";
 
-  result += "AddCards\n";
-  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-    result += "  ";
-    if (add_cards_.at(i).size() == 0) {
-      result += "Empty";
-    } else {
-      for (const Card card : add_cards_.at(i)) {
-        result += card.toString() + " ";
-      }
-    }
-    result += "\n";
-  }
-
-  result += "SubCards\n";
-  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-    result += "  ";
-    if (sub_cards_.at(i).size() == 0) {
-      result += "Empty";
-    } else {
-      for (const Card card : sub_cards_.at(i)) {
-        result += card.toString() + " ";
-      }
-    }
-    result += "\n";
-  }
-  result += "\n";
-
   return result;
 }
 
@@ -483,40 +452,6 @@ std::string UnoState::toJSON() const {
 
   result += "\"lastMove\":";
   result += '"' + move2String(last_move_) + '"';
-  result += ",";
-
-  result += "\"addCards\":";
-  result += "[";
-  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-    if (add_cards_.at(i).size() == 0) {
-      result += "\"Empty\"";
-    } else {
-      result += "[";
-      for (const Card card : add_cards_.at(i)) {
-        result += '"' + card.toString() + '"' + ",";
-      }
-      result += "]";
-    }
-    result += ",";
-  }
-  result += "]";
-  result += ",";
-
-  result += "\"subCards\":";
-  result += "[";
-  for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-    if (sub_cards_.at(i).size() == 0) {
-      result += "\"Empty\"";
-    } else {
-      result += "[";
-      for (const Card card : sub_cards_.at(i)) {
-        result += '"' + card.toString() + '"' + ",";
-      }
-      result += "]";
-    }
-    result += ",";
-  }
-  result += "]";
 
   result += "}";
 

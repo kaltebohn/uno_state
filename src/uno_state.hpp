@@ -128,7 +128,6 @@ class UnoState {
       }
     }
   }
-
   UnoState(std::vector<Card> deck,
            std::vector<Card> discards,
            std::array<Cards,
@@ -142,11 +141,8 @@ class UnoState {
            Color table_color,
            CardPattern table_pattern,
            bool is_challenge_valid,
-           Card drawn_card,
            Move last_move,
-           XorShift64 random_engine,
-           std::array<Cards, 4> add_cards,
-           std::array<Cards, 4> sub_cards
+           XorShift64 random_engine
            )
       : deck_(deck),
         discards_(discards),
@@ -161,9 +157,7 @@ class UnoState {
         table_pattern_(table_pattern),
         is_challenge_valid_(is_challenge_valid),
         last_move_(last_move),
-        random_engine_(random_engine),
-        add_cards_(add_cards),
-        sub_cards_(sub_cards)
+        random_engine_(random_engine)
   {}
 
   /* 受け取った手を適用して得られる状態を返す。 */
@@ -211,8 +205,6 @@ class UnoState {
   Color getTableColor() const { return table_color_; }
   CardPattern getTablePattern() const { return table_pattern_; }
   Move getLastAction() const { return last_move_; }
-  Cards getAddCards(const int player_num) const { return add_cards_.at(player_num); }
-  Cards getSubCards(const int player_num) const { return sub_cards_.at(player_num); }
 
   std::array<int, UnoConsts::kNumOfPlayers> getQuantityOfPlayerCards() const {
     std::array<int, UnoConsts::kNumOfPlayers> result{};
@@ -229,8 +221,6 @@ class UnoState {
     if (!std::equal(state.discards_.cbegin(), state.discards_.cend(), discards_.begin())) { return false; }
     for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
       if (!std::equal(state.player_cards_.at(i).cbegin(), state.player_cards_.at(i).cend(), player_cards_.at(i).begin())) { return false; }
-      if (!std::equal(state.add_cards_.at(i).cbegin(), state.add_cards_.at(i).cend(), add_cards_.at(i).begin())) { return false; }
-      if (!std::equal(state.sub_cards_.at(i).cbegin(), state.sub_cards_.at(i).cend(), sub_cards_.at(i).begin())) { return false; }
     }
     if (!std::equal(state.player_seats_.cbegin(), state.player_seats_.cend(), player_seats_.begin())) { return false; }
     if (!std::equal(state.player_scores_.cbegin(), state.player_scores_.cend(), player_scores_.begin())) { return false; }
@@ -266,8 +256,6 @@ class UnoState {
   bool is_challenge_valid_;
   Move last_move_{};
   XorShift64 random_engine_;
-  std::array<Cards, 4> add_cards_{}; // 状態遷移時に各プレイヤに追加されたカード。最初とシャッフルワイルド時は考えない。
-  std::array<Cards, 4> sub_cards_{}; // 状態遷移時に各プレイヤから削除されたカード。最初とシャッフルワイルド時は考えない。
 
   /* 可能な提出カードの全体を返す。 */
   virtual std::vector<Card> legalCards() const;
@@ -400,8 +388,8 @@ class UnoState {
   int nextPlayer() const { return nextPlayerOf(current_player_); }
 
   /* プレイヤに山札からnum枚のカードを渡す。 */
-  virtual void giveCards(const int player_number, const int num) {
-    for (int i = 0; i < num; i++) {
+  virtual void giveCards(const int player_number, const unsigned num) {
+    for (unsigned i = 0; i < num; i++) {
       if (deck_.size() == 0) { refreshDeck(); }
 
       /* 捨て札も山札も0枚の場合、バグか何かで手札をまったく捨てていないプレイヤが存在する。 */
@@ -410,16 +398,14 @@ class UnoState {
 
       const Card card = deck_.back(); deck_.pop_back();
       player_cards_.at(player_number).push_back(card);
-      add_cards_.at(player_number).push_back(card);
     }
   }
 
   /* プレイヤの手札に捨て札からnum枚のカードを返す。 */
-  virtual void returnCards(const int player_number, const int num) {
-    for (int i = 0; i < num; i++) {
-      assert(discards_.size() > 0); // ルール上、捨て札にはプレイヤが出した分(>= 返す分)以上あるはず。
+  virtual void returnCards(const int player_number, const unsigned num) {
+    assert(discards_.size() >= num); // ルール上、捨て札にはプレイヤが出した分(>= 返す分)以上あるはず。
+    for (unsigned i = 0; i < num; i++) {
       player_cards_.at(player_number).push_back(discards_.back());
-      add_cards_.at(player_number).push_back(discards_.back());
       discards_.pop_back();
     }
   }
@@ -436,7 +422,6 @@ class UnoState {
         std::find(player_cards_.at(player_number).begin(),
                   player_cards_.at(player_number).end(),
                   card));
-    sub_cards_.at(player_number).push_back(card);
 
     table_color_ = card.getColor();
     table_pattern_ = card.getPattern();
