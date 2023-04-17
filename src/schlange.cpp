@@ -1,84 +1,80 @@
 #include "schlange.hpp"
 
-Color Schlange::changeColor() const {
-  /* 手札中の一番多い色を選ぶ。 */
-  int num_of_blue{}, num_of_green{}, num_of_red{}, num_of_yellow{};
-
-  for (const Card& submission : legal_cards_) {
-    const Color color{submission.getColor()};
-    switch (color) {
-      case Color::kBlue:
-        num_of_blue++;
-        break;
-      case Color::kGreen:
-        num_of_green++;
-        break;
-      case Color::kRed:
-        num_of_red++;
-        break;
-      case Color::kYellow:
-        num_of_yellow++;
-        break;
-      case Color::kWild:
-        break;
-      default:
-        assert(false);
+Move Schlange::nextMove(const Observation& observation) {
+  if (observation.current_move_type_ == MoveType::kChallenge) {
+    /* チャレンジは常にしない。 */
+    return false;
+  } else if (observation.current_move_type_ == MoveType::kColorChoice) {
+    /* 手札中の一番多い色を選ぶ。 */
+    return ModeOfColorsInHand(observation.player_card_);
+  } else if (observation.current_move_type_ == MoveType::kSubmission) {
+    /* 評価関数が最大値を与えるものを選ぶ。 */
+    Cards legal_actions{};
+    std::transform(observation.legal_actions_.begin(), observation.legal_actions_.end(),
+        std::back_inserter(legal_actions),
+        [](const Move& move) { return std::get<Card>(move); });
+    return selectSubmission(legal_actions, observation.table_color_, observation.table_pattern_);
+  } else if (observation.current_move_type_ == MoveType::kSubmissionOfDrawnCard) {
+    /* 引いたカードが出せるなら(合法手中にパス以外のカードがあるなら)必ず出す。 */
+    for (const auto& submission : observation.legal_actions_) {
+      if (!std::get<Card>(submission).isEmpty()) { return submission; }
     }
-  }
-
-  if (num_of_blue >= num_of_green && num_of_blue >= num_of_red && num_of_blue >= num_of_yellow) {
-    return Color::kBlue;
-  } else if (num_of_green >= num_of_red && num_of_green >= num_of_yellow) {
-    return Color::kGreen;
-  } else if (num_of_red >= num_of_yellow) {
-    return Color::kRed;
+    return observation.legal_actions_.at(0);
   } else {
-    return Color::kYellow;
+    /* MoveTypeの定義上ここに到達することはないはず。 */
+    assert(false);
   }
 }
 
-Card Schlange::submitCard() const {
-  if (legal_cards_.size() == 1) { return legal_cards_.at(0); }
+Color Schlange::ModeOfColorsInHand(const Cards& hand) {
+  std::unordered_map<Color, int> color_freq{};
+  for (const auto& card : hand) {
+    const Color color{card.getColor()};
+    /* 無色(空のカード)、ワイルドは色として選ばない。 */
+    if (color == Color::kNull || color == Color::kWild) { continue; }
 
-  const std::vector<Card>& legal_submissions{legal_cards_};
+    color_freq[card.getColor()]++;
+  }
+  const auto max_iter = std::max_element(color_freq.begin(), color_freq.end(),
+      [](const auto& a, const auto& b) { return a.second < b.second; });
 
-  /* 評価値で重みづけする。 */
-  std::vector<int> scores(legal_submissions.size());
-  int best_idx{0};
-  int best_score{-1000000};
-  for (unsigned i = 0; i < legal_submissions.size(); i++) {
-    const Card card{legal_submissions.at(i)};
-    if (card.isEmpty()) {
-      /* 空のカードは基本的に出さない。 */
-      scores.at(i) = -10000;
-    } else if (std::holds_alternative<CardNumber>(card.getPattern())) {
-      /* 数字カードなら、(書かれている数字)を評価値とする。 */
-      scores.at(i) = cardNumber2Int(std::get<CardNumber>(card.getPattern()));
-    } else if (card.getColor() != Color::kWild) {
-      /* ワイルド以外の記号カードなら、20点を評価値とする。 */
-      scores.at(i) = 20;
-    } else {
-      /* ワイルド系なら、ワイルドは-40、ワイルドドロー4は-100、他は-50とする。 */
-      assert(std::holds_alternative<CardAction>(card.getPattern()));
-      const CardAction action{std::get<CardAction>(card.getPattern())};
-      switch (action) {
-        case CardAction::kWild:
-          scores.at(i) = -40;
-          break;
-        case CardAction::kWildDraw4:
-          scores.at(i) = -100;
-          break;
-        default:
-          scores.at(i) = -50;
-          break;
-      }
-    }
+  /* 手札に空のカードとワイルド系しかない場合は、とりあえず赤を返す。 */
+  return max_iter == color_freq.end() ? Color::kRed : max_iter->first;
+}
 
-    if (scores.at(i) > best_score) {
-      best_idx = i;
-      best_score = scores.at(i);
+int Schlange::evaluateSubmission(const Card& card) {
+  if (card.isEmpty()) {
+    /* 空のカードは基本的に出さない。 */
+    return -10000;
+  } else if (std::holds_alternative<CardNumber>(card.getPattern())) {
+    /* 数字カードなら、(書かれている数字)を評価値とする。 */
+    return cardNumber2Int(std::get<CardNumber>(card.getPattern()));
+  } else if (card.getColor() != Color::kWild) {
+    /* ワイルド以外の記号カードなら、20点を評価値とする。 */
+    return 20;
+  } else {
+    /* ワイルド系なら、ワイルドは-40、ワイルドドロー4は-100、他は-50とする。 */
+    assert(std::holds_alternative<CardAction>(card.getPattern()));
+    const CardAction action{std::get<CardAction>(card.getPattern())};
+    switch (action) {
+      case CardAction::kWild:
+        return -40;
+      case CardAction::kWildDraw4:
+        return -100;
+      default:
+        return -50;
     }
   }
+}
 
-  return legal_submissions.at(best_idx);
+Card Schlange::selectSubmission(const Cards& submissions, const Color& table_color, const CardPattern& table_pattern) {
+  assert(submissions.size() > 0); // 合法手には必ずパスが入っているので、長さ1以上のはず。
+  if (submissions.size() == 1) { return submissions.at(0); }
+
+  /* 手持ちのカードを評価。 */
+  std::vector<int> scores{};
+  std::transform(submissions.begin(), submissions.end(), std::back_inserter(scores),
+      [](const auto& card) { return evaluateSubmission(card); });
+  const auto max_iter = std::max_element(scores.begin(), scores.end());
+  return submissions.at(std::distance(scores.begin(), max_iter));
 }

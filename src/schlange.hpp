@@ -2,49 +2,21 @@
 #define SCHLANGE_HPP_
 
 #include <algorithm>
+#include <unordered_map>
 
 #include "move.hpp"
+#include "move_type.hpp"
+#include "observation.hpp"
 
 class Schlange {
  public:
-  void setMyCards(const Cards& cards) {
-    my_cards_.clear();
-    std::copy(cards.begin(), cards.end(), std::back_inserter(my_cards_));
-  }
+  static Move nextMove(const Observation& observation);
 
-  void setTableColor(const Color color) { table_color_ = color; }
+  static Color ModeOfColorsInHand(const Cards& hand);
 
-  void setTablePattern(const CardPattern pattern) { table_pattern_ = pattern; }
+  static Card selectSubmission(const Cards& hand, const Color& table_color, const CardPattern& table_pattern);
 
-  /* 合法手を列挙して保存。 */
-  /* Schlangeでは出せるカードがあるときにパスをしないので、空のカードは含めない。 */
-  void setLegalSubmissions() {
-    legal_cards_.clear();
-    for (const Card& card : my_cards_) {
-      Card submission{card};
-      if (submission.isLegal(table_color_, table_pattern_)) {
-        legal_cards_.push_back(submission);
-      }
-    }
-  }
-
-  Color changeColor() const;
-
-  bool willPlayDrawnCard(const Card& drawn_card) const {
-    return Card(drawn_card).isLegal(table_color_, table_pattern_);
-  }
-
-  bool willChallenge() const { return false; }
-
-  bool willDraw() const { return legal_cards_.size() == 0; }
-
-  Card submitCard() const;
-
- private:
-  Cards my_cards_{};
-  Color table_color_{};
-  CardPattern table_pattern_{};
-  std::vector<Card> legal_cards_{};
+  static int evaluateSubmission(const Card& card);
 };
 
 #endif // SCHLANGE_HPP_

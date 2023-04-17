@@ -14,14 +14,9 @@
 #include "external/xorshift64.hpp"
 #include "card.hpp"
 #include "move.hpp"
+#include "move_type.hpp"
+#include "observation.hpp"
 #include "uno_consts.hpp"
-
-enum class MoveType {
-  kChallenge,
-  kColorChoice,
-  kSubmission,
-  kSubmissionOfDrawnCard
-};
 
 std::string moveType2String(const MoveType move_type);
 
@@ -73,7 +68,7 @@ class UnoState {
 
     /* 山札をシャッフル。 */
     refreshDeck();
-    
+
     /* プレイヤにカードを7枚ずつ分配。 */
     for (int player_num = 0; player_num < UnoConsts::kNumOfPlayers; player_num++) {
       std::copy(deck_.begin(), deck_.begin() + 7, std::back_inserter(player_cards_.at(player_num)));
@@ -153,7 +148,7 @@ class UnoState {
            Move last_move,
            XorShift64 random_engine,
            std::array<Cards, 4> add_cards,
-           std::array<Cards, 4> sub_cards 
+           std::array<Cards, 4> sub_cards
            )
       : deck_(deck),
         discards_(discards),
@@ -186,6 +181,27 @@ class UnoState {
         [](Cards cards){ return cards.size() == 0; });
   }
 
+  Observation getObservation(const int player) const {
+    std::array<int, UnoConsts::kNumOfPlayers> player_card_qtys{};
+    std::transform(player_cards_.begin(), player_cards_.end(), player_card_qtys.begin(),
+        [](const Cards& cards) {
+          return cards.size();
+        });
+    return Observation{
+      discards_,
+      player_cards_.at(player),
+      legalActions(),
+      player_card_qtys,
+      player_seats_,
+      current_move_type_,
+      prev_player_,
+      current_player_,
+      is_normal_order_,
+      table_color_,
+      table_pattern_
+    };
+  }
+
   Cards getDiscards() const { return discards_; }
   Cards getPlayerCards(int player_num) const { return player_cards_.at(player_num); }
   int getPlayerSeats(const int player_num) const { return player_seats_.at(player_num); }
@@ -214,14 +230,14 @@ class UnoState {
   /* テスト用。 */
   virtual bool operator ==(const UnoState& state) const {
     if (!std::equal(state.deck_.cbegin(), state.deck_.cend(), deck_.begin())) { return false; }
-    if (!std::equal(state.discards_.cbegin(), state.discards_.cend(), discards_.begin())) { return false; }         
+    if (!std::equal(state.discards_.cbegin(), state.discards_.cend(), discards_.begin())) { return false; }
     for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-      if (!std::equal(state.player_cards_.at(i).cbegin(), state.player_cards_.at(i).cend(), player_cards_.at(i).begin())) { return false; }         
-      if (!std::equal(state.add_cards_.at(i).cbegin(), state.add_cards_.at(i).cend(), add_cards_.at(i).begin())) { return false; }         
-      if (!std::equal(state.sub_cards_.at(i).cbegin(), state.sub_cards_.at(i).cend(), sub_cards_.at(i).begin())) { return false; }         
+      if (!std::equal(state.player_cards_.at(i).cbegin(), state.player_cards_.at(i).cend(), player_cards_.at(i).begin())) { return false; }
+      if (!std::equal(state.add_cards_.at(i).cbegin(), state.add_cards_.at(i).cend(), add_cards_.at(i).begin())) { return false; }
+      if (!std::equal(state.sub_cards_.at(i).cbegin(), state.sub_cards_.at(i).cend(), sub_cards_.at(i).begin())) { return false; }
     }
-    if (!std::equal(state.player_seats_.cbegin(), state.player_seats_.cend(), player_seats_.begin())) { return false; }         
-    if (!std::equal(state.player_scores_.cbegin(), state.player_scores_.cend(), player_scores_.begin())) { return false; }         
+    if (!std::equal(state.player_seats_.cbegin(), state.player_seats_.cend(), player_seats_.begin())) { return false; }
+    if (!std::equal(state.player_scores_.cbegin(), state.player_scores_.cend(), player_scores_.begin())) { return false; }
     if (state.current_move_type_ != current_move_type_) { return false; }
     if (state.prev_player_ != prev_player_) { return false; }
     if (state.current_player_ != current_player_) { return false; }
@@ -256,8 +272,8 @@ class UnoState {
   Card drawn_card_; // 直前にプレイヤが引いたカード。
   Move last_move_{};
   XorShift64 random_engine_;
-  std::array<Cards, 4> add_cards_{}; // 状態遷移時に各プレイヤに追加されたカード。最初とシャッフルワイルド時は考えない。  
-  std::array<Cards, 4> sub_cards_{}; // 状態遷移時に各プレイヤから削除されたカード。最初とシャッフルワイルド時は考えない。  
+  std::array<Cards, 4> add_cards_{}; // 状態遷移時に各プレイヤに追加されたカード。最初とシャッフルワイルド時は考えない。
+  std::array<Cards, 4> sub_cards_{}; // 状態遷移時に各プレイヤから削除されたカード。最初とシャッフルワイルド時は考えない。
 
   /* 可能な提出カードの全体を返す。 */
   virtual std::vector<Card> legalCards() const;
