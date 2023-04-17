@@ -63,7 +63,7 @@ class UnoState {
     }
 
     /* 山札をシャッフル。 */
-    refreshDeck();
+    shuffleCards(deck_);
 
     /* プレイヤにカードを7枚ずつ分配。 */
     for (int player_num = 0; player_num < UnoConsts::kNumOfPlayers; player_num++) {
@@ -84,7 +84,7 @@ class UnoState {
         deck_.pop_back();
         first_table_card = tmp_card;
       } else {
-        refreshDeck();
+        shuffleCards(deck_);
       }
     }
     discards_.push_back(first_table_card);
@@ -372,7 +372,7 @@ class UnoState {
   /* プレイヤに山札からnum枚のカードを渡す。 */
   virtual void giveCards(const int player_number, const unsigned num) {
     for (unsigned i = 0; i < num; i++) {
-      if (deck_.size() == 0) { refreshDeck(); }
+      if (deck_.size() == 0) { reshuffleDeckFromDiscards(); }
 
       /* 捨て札も山札も0枚の場合、バグか何かで手札をまったく捨てていないプレイヤが存在する。 */
       /* このクラスはそうしたプレイヤを許容する必要がないので、強制終了させる。 */
@@ -413,9 +413,12 @@ class UnoState {
     std::shuffle(cards.begin(), cards.end(), random_engine_);
   }
 
-  void refreshDeck() {
-    std::copy(discards_.begin(), discards_.end(), std::back_inserter(deck_));
-    discards_.clear();
+  /* 捨て札を山札に戻し、再度シャッフルする。ただし、場札だけは捨て札に残す。 */
+  void reshuffleDeckFromDiscards() {
+    assert(discards_.size() > 0); // 山札も捨て札も0枚ならプレイヤのロジックがおかしい。
+    const Card table_card{discards_.back()};
+    std::copy(discards_.begin(), discards_.end() - 1, std::back_inserter(deck_));
+    discards_.clear(); discards_.push_back(table_card);
     shuffleCards(deck_);
   }
 

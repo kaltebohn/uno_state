@@ -120,6 +120,7 @@ UnoState UnoState::nextWhenChallenge(UnoState& state, const ChallengeFlag will_c
   }
 
   /* チャレンジ成功判定。 */
+  assert(discards_.size() >= 2); // チャレンジ時には、ワイルドドロー4の他にもう一枚捨て札があるはず。
   const Card& prev_table_card{discards_.at(discards_.size() - 2)};
   const bool is_challenge_valid = std::any_of(player_cards_.at(prev_player_).begin(), player_cards_.at(prev_player_).end(),
       [&prev_table_card](Card card) {
