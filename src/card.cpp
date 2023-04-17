@@ -409,8 +409,8 @@ Cards allCards() {
       Card::kWildDraw4,
       Card::kWildDraw4,
       Card::kWildShuffleHands,
-      Card::kWildCustomizable,
-      Card::kWildCustomizable,
-      Card::kWildCustomizable
+      // Card::kWildCustomizable,
+      // Card::kWildCustomizable,
+      // Card::kWildCustomizable
   }};
 }

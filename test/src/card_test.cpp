@@ -3,7 +3,8 @@
 #include "../../src/card.hpp"
 
 TEST(AllCardsTest, NumOfAllCards) {
-  EXPECT_EQ(allCards().size(), 112);
+  // EXPECT_EQ(allCards().size(), 112);
+  EXPECT_EQ(allCards().size(), 109);
 }
 
 TEST(GetColorTest, NormalColor) {

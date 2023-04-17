@@ -587,7 +587,8 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
   };
   UnoState dst_state{src_state.next(Card{})};
 
-  Card drawn_card{Card::kWildCustomizable};
+  // Card drawn_card{Card::kWildCustomizable};
+  Card drawn_card{Card::kWildShuffleHands};
   Cards target_deck{src_deck};
   target_deck.erase(std::find(target_deck.begin(), target_deck.end(), drawn_card));
   std::array<Cards, UnoConsts::kNumOfPlayers> target_player_cards{src_player_cards};
@@ -1610,8 +1611,9 @@ TEST(GetScoreTest, Action) {
         Card::kRedSkip,
         Card::kWild,
         Card::kWildDraw4,
-        Card::kWildShuffleHands,
-        Card::kWildCustomizable}},
+        // Card::kWildShuffleHands,
+        Card::kWildShuffleHands}},
+        // Card::kWildCustomizable}},
       {{Card::kYellowDrawTwo}}
   }};
   for (int i = 0; i < 4; i++) {
@@ -1636,9 +1638,11 @@ TEST(GetScoreTest, Action) {
   };
   state = state.next(submitted_card);
 
-  EXPECT_EQ(state.getScore(0), 310);
+  // EXPECT_EQ(state.getScore(0), 310);
+  EXPECT_EQ(state.getScore(0), 270);
   EXPECT_EQ(state.getScore(1), -50);
-  EXPECT_EQ(state.getScore(2), -240);
+  // EXPECT_EQ(state.getScore(2), -240);
+  EXPECT_EQ(state.getScore(2), -200);
   EXPECT_EQ(state.getScore(3), -20);
 }
 
