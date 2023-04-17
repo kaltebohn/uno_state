@@ -27,7 +27,7 @@ UnoStateBind2 UnoStateBind2::next(const Move& move) const {
 
     const int current_player{state.current_player_};
     const int next_player{state.nextPlayer()};
- 
+
     /* バインド2を受けているプレイヤにあり得る着手型は、提出かチャレンジのどちらか。 */
     /* 提出なら、強制的にカードを引かせ、チャレンジなら、チャレンジできない。 */
     if (state.current_move_type_ == MoveType::kChallenge) {
@@ -163,10 +163,6 @@ std::string UnoStateBind2::toJSON() const {
   result += std::to_string(is_challenge_valid_);
   result += ",";
 
-  result += "\"drawnCard\":";
-  result += '"' + drawn_card_.toString() + '"';
-  result += ",";
-
   result += "\"lastMove\":";
   result += '"' + move2String(last_move_) + '"';
   result += ",";
@@ -208,7 +204,7 @@ std::string UnoStateBind2::toJSON() const {
   result.pop_back();
   result += "]";
   result += ",";
-  
+
   result += "\"boundPlayer\":";
   result += std::to_string(bound_player_);
   result += ",";

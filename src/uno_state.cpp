@@ -39,7 +39,6 @@ UnoState UnoState::next(Move move) const {
   }
 
   if (current_move_type_ == MoveType::kSubmissionOfDrawnCard) {
-    state.drawn_card_ = Card{}; // drawn_card_をチャラにする。
     Card submission = std::get<Card>(move);
 
     if (submission.isEmpty()) {
@@ -48,7 +47,9 @@ UnoState UnoState::next(Move move) const {
       state.current_player_ = nextPlayer();
       return state;
     } else {
-      if (submission != drawn_card_ || !submission.isLegal(table_color_, table_pattern_)) {
+      /* 着手が引いたカード(手札の最後)かつ合法でなければ、ペナルティ。 */
+      if (submission != player_cards_.at(current_player_).back() ||
+          !submission.isLegal(table_color_, table_pattern_)) {
         /* 着手が違法なら、ペナルティとして2枚カードを引く。 */
         state.giveCards(current_player_, 2);
         state.current_move_type_ = MoveType::kSubmission;
@@ -210,7 +211,6 @@ UnoState UnoState::nextWhenEmptyCardSubmission(UnoState& state) const {
   const int current_player{current_player_};
   state.current_move_type_ = MoveType::kSubmissionOfDrawnCard;
   state.giveCards(current_player, 1);
-  state.drawn_card_ = state.player_cards_.at(current_player).back();
   return state;
 }
 
@@ -239,8 +239,7 @@ std::vector<Move> UnoState::legalActions() const {
         });
     return result;
   } else if (current_move_type_ == MoveType::kSubmissionOfDrawnCard) {
-    assert(!drawn_card_.isEmpty()); // ここはカードを引いた際に移る処理だから、drawn_card_は空になり得ない。
-    const Card submission_of_drawn_card{drawn_card_};
+    const Card submission_of_drawn_card{player_cards_.at(current_player_).back()};
     std::vector<Card> submissions{Card{}};
     if (submission_of_drawn_card.isLegal(table_color_, table_pattern_)) {
       submissions.push_back(submission_of_drawn_card);
@@ -357,11 +356,6 @@ std::string UnoState::toString() const {
   result += "IsChallengeValid?\n";
   result += "  ";
   result += std::to_string(is_challenge_valid_);
-  result += "\n";
-
-  result += "DrawnCard\n";
-  result += "  ";
-  result += drawn_card_.toString();
   result += "\n";
 
   result += "LastMove\n";
@@ -487,10 +481,6 @@ std::string UnoState::toJSON() const {
   result += std::to_string(is_challenge_valid_);
   result += ",";
 
-  result += "\"drawnCard\":";
-  result += '"' + drawn_card_.toString() + '"';
-  result += ",";
-
   result += "\"lastMove\":";
   result += '"' + move2String(last_move_) + '"';
   result += ",";
@@ -527,7 +517,7 @@ std::string UnoState::toJSON() const {
     result += ",";
   }
   result += "]";
-  
+
   result += "}";
 
   return result;

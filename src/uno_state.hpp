@@ -40,8 +40,7 @@ class UnoState {
         is_normal_order_(),
         table_color_(),
         table_pattern_(),
-        is_challenge_valid_(),
-        drawn_card_() {}
+        is_challenge_valid_() {}
 
   /* ゲーム開始用。 */
   UnoState(const Cards& first_deck, XorShift64::result_type random_seed = 0, Card first_table_card = {})
@@ -56,8 +55,7 @@ class UnoState {
         is_normal_order_(true),
         table_color_(),
         table_pattern_(),
-        is_challenge_valid_(),
-        drawn_card_() {
+        is_challenge_valid_() {
     /* 乱数エンジンをセット。 */
     if (random_seed == 0) {
       std::random_device seed_gen;
@@ -162,7 +160,6 @@ class UnoState {
         table_color_(table_color),
         table_pattern_(table_pattern),
         is_challenge_valid_(is_challenge_valid),
-        drawn_card_(drawn_card),
         last_move_(last_move),
         random_engine_(random_engine),
         add_cards_(add_cards),
@@ -213,7 +210,6 @@ class UnoState {
   bool getIsNormalOrder() const { return is_normal_order_; }
   Color getTableColor() const { return table_color_; }
   CardPattern getTablePattern() const { return table_pattern_; }
-  Card getDrawnCard() const { return drawn_card_; }
   Move getLastAction() const { return last_move_; }
   Cards getAddCards(const int player_num) const { return add_cards_.at(player_num); }
   Cards getSubCards(const int player_num) const { return sub_cards_.at(player_num); }
@@ -245,7 +241,6 @@ class UnoState {
     if (state.table_color_ != table_color_) { return false; }
     if (state.table_pattern_ != table_pattern_) { return false; }
     if (state.is_challenge_valid_ != is_challenge_valid_) { return false; }
-    if (state.drawn_card_ != drawn_card_) { return false; }
 
     return true;
   }
@@ -269,7 +264,6 @@ class UnoState {
   Color table_color_;
   CardPattern table_pattern_;
   bool is_challenge_valid_;
-  Card drawn_card_; // 直前にプレイヤが引いたカード。
   Move last_move_{};
   XorShift64 random_engine_;
   std::array<Cards, 4> add_cards_{}; // 状態遷移時に各プレイヤに追加されたカード。最初とシャッフルワイルド時は考えない。
