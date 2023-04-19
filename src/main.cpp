@@ -1,16 +1,26 @@
 #include "schlange.hpp"
 #include "uno_state_bind2.hpp"
+#include "wuerfel.hpp"
 
 int main(void) {
-  std::array<Schlange, 4> players{};
-  std::array<int, 4> sum_of_score{};
   std::random_device seed_gen;
+  Schlange player{};
+  std::vector<Wuerfel> opponents{};
+  for (int i = 0; i < 3; i++) {
+    opponents.push_back(Wuerfel(seed_gen()));
+  }
+
+  std::array<int, 4> sum_of_score{};
   for (int i = 0; i < 1000; i++) {
     UnoStateBind2 state{allCards(), seed_gen()};
     while (!state.isFinished()) {
       const int current_player{state.getCurrentPlayerNum()};
-      Schlange& player{players.at(current_player)};
-      state = state.next(player.nextMove(state.getObservation(current_player)));
+      if (current_player == 0) {
+        state = state.next(player.nextMove(state.getObservation(current_player)));
+      } else {
+        Wuerfel& opponent{opponents.at(current_player - 1)};
+        state = state.next(opponent.nextMove(state.getObservation(current_player)));
+      }
     }
     sum_of_score.at(0) += state.getScore(0);
     sum_of_score.at(1) += state.getScore(1);
