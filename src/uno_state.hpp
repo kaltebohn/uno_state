@@ -376,6 +376,10 @@ class UnoState {
 
       /* 捨て札も山札も0枚の場合、バグか何かで手札をまったく捨てていないプレイヤが存在する。 */
       /* このクラスはそうしたプレイヤを許容する必要がないので、強制終了させる。 */
+      if (deck_.size() <= 0) {
+        // たまにここ引っかかるので調査。
+        std::cout << *this << std::endl;
+      }
       assert(deck_.size() > 0);
 
       const Card card = deck_.back(); deck_.pop_back();
