@@ -162,6 +162,10 @@ class UnoState {
 
   /* ゲームが終了しているか？ */
   virtual bool isFinished() const {
+    /* 山札0枚で、捨て札もテーブルの1枚しかない場合、ALGORIのルールに合わせてゲームを終了する。 */
+    if (deck_.size() <= 0 && discards_.size() <= 1) { return true; }
+
+    /* 誰かひとりの手札がなくなったらゲームを終了する。 */
     return std::any_of(player_cards_.cbegin(), player_cards_.cend(),
         [](Cards cards){ return cards.size() == 0; });
   }
@@ -333,9 +337,9 @@ class UnoState {
 
   virtual void acceptSubmission(const Card& submission);
 
-  // TODO: たまに正しく得点を付けられていない気がする。
   virtual void scoreToPlayers() {
     if (!isFinished()) { return; }
+
     /* カードが残っているプレイヤから減点。 */
     int finished_player{-1};
     int sum_of_scores{};
@@ -352,6 +356,13 @@ class UnoState {
           })};
       player_scores_.at(i) = -score;
       sum_of_scores += score;
+    }
+
+    /* 山札0枚、捨て札1枚になってゲームが終了した場合、勝者はいない。 */
+    if (deck_.size() <= 0 && discards_.size() <= 1) {
+      /* ここに来た場合は、ALGORIのルールに従い各プレイヤから減点するだけで、加算の必要はない。 */
+      assert(finished_player == -1); // 勝者はいないはず。
+      return;
     }
 
     /* 各プレイヤの減点分を上がったプレイヤに加算。 */
@@ -374,14 +385,14 @@ class UnoState {
     for (unsigned i = 0; i < num; i++) {
       if (deck_.size() == 0) { reshuffleDeckFromDiscards(); }
 
-      /* 捨て札も山札も0枚の場合、バグか何かで手札をまったく捨てていないプレイヤが存在する。 */
-      /* このクラスはそうしたプレイヤを許容する必要がないので、強制終了させる。 */
-      if (deck_.size() <= 0) {
-        // たまにここ引っかかるので調査。
-        std::cout << *this << std::endl;
+      /* 渡せるカードがなければゲーム終了になる。渡す処理の後さらに何かカードを移す操作を
+         することはないはずなので、処理を返すだけでよい。 */
+      if (deck_.size() <= 0 && discards_.size() <= 1) {
+        scoreToPlayers();
+        return;
       }
-      assert(deck_.size() > 0);
 
+      assert(deck_.size() > 0);
       const Card card = deck_.back(); deck_.pop_back();
       player_cards_.at(player_number).push_back(card);
     }
