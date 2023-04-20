@@ -33,12 +33,12 @@ TEST(StateTransitionTest, NotChallenge) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kChallenge,
+      gType::kChallenge,
       3,
       0,
       true,
       Color::kBlue,
-      CardAction::kWildDraw4,
+      Cardg::kWildDraw4,
       XorShift64()
   };
   UnoState dst_state{src_state.next(false)};
@@ -52,12 +52,12 @@ TEST(StateTransitionTest, NotChallenge) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       1,
       true,
       Color::kBlue,
-      CardAction::kWildDraw4,
+      Cardg::kWildDraw4,
       XorShift64()
   };
 
@@ -95,12 +95,12 @@ TEST(StateTransitionTest, ChallengeFailed) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kChallenge,
+      gType::kChallenge,
       3,
       0,
       true,
       Color::kBlue,
-      CardAction::kWildDraw4,
+      Cardg::kWildDraw4,
       XorShift64()
   };
   UnoState dst_state{src_state.next(true)};
@@ -114,12 +114,12 @@ TEST(StateTransitionTest, ChallengeFailed) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       1,
       true,
       Color::kBlue,
-      CardAction::kWildDraw4,
+      Cardg::kWildDraw4,
       XorShift64()
   };
 
@@ -157,12 +157,12 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kChallenge,
+      gType::kChallenge,
       3,
       0,
       true,
       Color::kBlue,
-      CardAction::kWildDraw4,
+      Cardg::kWildDraw4,
       XorShift64()
   };
   UnoState dst_state{src_state.next(true)};
@@ -176,7 +176,7 @@ TEST(StateTransitionTest, ChallengeSucceeded) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       3,
       true,
@@ -217,7 +217,7 @@ TEST(StateTransitionTest, ColorChoice) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kColorChoice,
+      gType::kColorChoice,
       3,
       0,
       true,
@@ -233,7 +233,7 @@ TEST(StateTransitionTest, ColorChoice) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       1,
       true,
@@ -274,7 +274,7 @@ TEST(StateTransitionTest, IlligalColorChoice) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kColorChoice,
+      gType::kColorChoice,
       3,
       0,
       true,
@@ -293,7 +293,7 @@ TEST(StateTransitionTest, IlligalColorChoice) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       1,
       true,
@@ -336,7 +336,7 @@ TEST(StateTransitionTest, SubmissionOfDrawnCard) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmissionOfDrawnCard,
+      gType::kSubmissionOfDrawnCard,
       3,
       0,
       true,
@@ -359,7 +359,7 @@ TEST(StateTransitionTest, SubmissionOfDrawnCard) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       1,
       true,
@@ -401,7 +401,7 @@ TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmissionOfDrawnCard,
+      gType::kSubmissionOfDrawnCard,
       3,
       0,
       true,
@@ -420,7 +420,7 @@ TEST(StateTransitionTest, IllegalSubmissionOfDrawnCard) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       1,
       true,
@@ -462,7 +462,7 @@ TEST(StateTransitionTest, EmptySubmissionOfDrawnCard) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmissionOfDrawnCard,
+      gType::kSubmissionOfDrawnCard,
       3,
       0,
       true,
@@ -479,7 +479,7 @@ TEST(StateTransitionTest, EmptySubmissionOfDrawnCard) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       1,
       true,
@@ -519,7 +519,7 @@ TEST(StateTransitionTest, IlligalSubmission) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -538,7 +538,7 @@ TEST(StateTransitionTest, IlligalSubmission) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       1,
       true,
@@ -577,7 +577,7 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -599,7 +599,7 @@ TEST(StateTransitionTest, EmptyCardSubmission) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmissionOfDrawnCard,
+      gType::kSubmissionOfDrawnCard,
       3,
       0,
       true,
@@ -639,7 +639,7 @@ TEST(StateTransitionTest, NumberSubmission) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -661,7 +661,7 @@ TEST(StateTransitionTest, NumberSubmission) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       1,
       true,
@@ -701,7 +701,7 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -725,7 +725,7 @@ TEST(StateTransitionTest, DrawTwoSubmission) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       2,
       true,
@@ -765,7 +765,7 @@ TEST(StateTransitionTest, ReverseSubmission) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -787,7 +787,7 @@ TEST(StateTransitionTest, ReverseSubmission) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       3,
       false,
@@ -827,7 +827,7 @@ TEST(StateTransitionTest, SkipSubmission) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -849,7 +849,7 @@ TEST(StateTransitionTest, SkipSubmission) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       0,
       2,
       true,
@@ -889,7 +889,7 @@ TEST(StateTransitionTest, WildSubmission) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -911,7 +911,7 @@ TEST(StateTransitionTest, WildSubmission) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kColorChoice,
+      gType::kColorChoice,
       3,
       0,
       true,
@@ -961,7 +961,7 @@ TEST(StateTransitionTest, WildDraw4Submission) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -983,7 +983,7 @@ TEST(StateTransitionTest, WildDraw4Submission) {
       target_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kColorChoice,
+      gType::kColorChoice,
       3,
       0,
       true,
@@ -1023,7 +1023,7 @@ TEST(StateTransitionTest, WildShuffleHandsSubmission) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -1035,7 +1035,7 @@ TEST(StateTransitionTest, WildShuffleHandsSubmission) {
 
   /* シャッフルワイルドを出した後の各プレイヤの手札はランダムに定まるので、着手の型と手札枚数の確認だけする。 */
   /* 他の効果は、他のカードに対するテストで確かめられていると思うことにする。 */
-  EXPECT_EQ(dst_state.getCurrentMoveType(), MoveType::kColorChoice);
+  EXPECT_EQ(dst_state.getCurrentgType(), ActionType::kColorChoice);
   for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
     if (i == 1) {
       EXPECT_EQ(dst_state.getPlayerCards(i).size(), 2);
@@ -1083,7 +1083,7 @@ TEST(StateTransitionTest, AlreadyFinished) {
       src_player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{-1, -1, -1, 3},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -1100,7 +1100,7 @@ TEST(StateTransitionTest, AlreadyFinished) {
   合法手列挙テスト。色選択の場合。
   期待する出力: {青, 緑, 赤, 黄色}。
 */
-TEST(LegalMovesTest, ColorChoice) {
+TEST(LegalgsTest, ColorChoice) {
   Card table_card{Card::kWild};
   Cards deck{allCards()};
   deck.erase(std::find(deck.begin(), deck.end(), table_card));
@@ -1123,7 +1123,7 @@ TEST(LegalMovesTest, ColorChoice) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kColorChoice,
+      gType::kColorChoice,
       3,
       0,
       true,
@@ -1132,20 +1132,20 @@ TEST(LegalMovesTest, ColorChoice) {
       XorShift64()
   };
 
-  auto legal_moves = state.legalActions();
+  auto legal_actions = state.legalgs();
 
-  EXPECT_EQ(legal_moves.size(), 4);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Color::kBlue), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Color::kGreen), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Color::kRed), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)Color::kYellow), legal_moves.end());
+  EXPECT_EQ(legal_actions.size(), 4);
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)Color::kBlue), legal_actions.end());
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)Color::kGreen), legal_actions.end());
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)Color::kRed), legal_actions.end());
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)Color::kYellow), legal_actions.end());
 }
 
 /*
   合法手列挙テスト。チャレンジの場合。
   期待する出力: {True, False}。
 */
-TEST(LegalMovesTest, Challenge) {
+TEST(LegalgsTest, Challenge) {
   Card table_card{Card::kWildDraw4};
   Cards deck{allCards()};
   deck.erase(std::find(deck.begin(), deck.end(), table_card));
@@ -1168,7 +1168,7 @@ TEST(LegalMovesTest, Challenge) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kChallenge,
+      gType::kChallenge,
       3,
       0,
       true,
@@ -1177,18 +1177,18 @@ TEST(LegalMovesTest, Challenge) {
       XorShift64()
   };
 
-  auto legal_moves = state.legalActions();
+  auto legal_actions = state.legalgs();
 
-  EXPECT_EQ(legal_moves.size(), 2);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)true), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)false), legal_moves.end());
+  EXPECT_EQ(legal_actions.size(), 2);
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)true), legal_actions.end());
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)false), legal_actions.end());
 }
 
 /*
   合法手列挙テスト。引いたカードの提出の場合。
   期待する出力: {空のカード, 引いたカード}。
 */
-TEST(LegalMovesTest, SubmissionOfDrawnCard) {
+TEST(LegalgsTest, SubmissionOfDrawnCard) {
   Card table_card{Card::kBlueZero};
   Cards deck{allCards()};
   deck.erase(std::find(deck.begin(), deck.end(), table_card));
@@ -1212,7 +1212,7 @@ TEST(LegalMovesTest, SubmissionOfDrawnCard) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmissionOfDrawnCard,
+      gType::kSubmissionOfDrawnCard,
       3,
       0,
       true,
@@ -1221,18 +1221,18 @@ TEST(LegalMovesTest, SubmissionOfDrawnCard) {
       XorShift64()
   };
 
-  auto legal_moves = state.legalActions();
+  auto legal_actions = state.legalgs();
 
-  EXPECT_EQ(legal_moves.size(), 2);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card{})), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(drawn_card)), legal_moves.end());
+  EXPECT_EQ(legal_actions.size(), 2);
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)(Card{})), legal_actions.end());
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)(drawn_card)), legal_actions.end());
 }
 
 /*
   合法手列挙テスト。引いたカードの提出で、出せるカードがない場合。
   期待する出力: {空のカード}。
 */
-TEST(LegalMovesTest, SubmissionOfDrawnCardNothing) {
+TEST(LegalgsTest, SubmissionOfDrawnCardNothing) {
   Card table_card{Card::kGreenZero};
   Cards deck{allCards()};
   deck.erase(std::find(deck.begin(), deck.end(), table_card));
@@ -1256,7 +1256,7 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardNothing) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmissionOfDrawnCard,
+      gType::kSubmissionOfDrawnCard,
       3,
       0,
       true,
@@ -1265,17 +1265,17 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardNothing) {
       XorShift64()
   };
 
-  auto legal_moves = state.legalActions();
+  auto legal_actions = state.legalgs();
 
-  EXPECT_EQ(legal_moves.size(), 1);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card{})), legal_moves.end());
+  EXPECT_EQ(legal_actions.size(), 1);
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)(Card{})), legal_actions.end());
 }
 
 /*
   合法手列挙テスト。引いたカードの提出で、現プレイヤの手札が2枚の場合。
   期待する出力: {空のカード, 引いたカード}。引いたカードのUNO宣言フラグが立っている。
 */
-TEST(LegalMovesTest, SubmissionOfDrawnCardOnUNO) {
+TEST(LegalgsTest, SubmissionOfDrawnCardOnUNO) {
   Card table_card{Card::kBlueZero};
   Cards deck{allCards()};
   deck.erase(std::find(deck.begin(), deck.end(), table_card));
@@ -1299,7 +1299,7 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardOnUNO) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmissionOfDrawnCard,
+      gType::kSubmissionOfDrawnCard,
       3,
       0,
       true,
@@ -1308,17 +1308,17 @@ TEST(LegalMovesTest, SubmissionOfDrawnCardOnUNO) {
       XorShift64()
   };
 
-  auto legal_moves = state.legalActions();
+  auto legal_actions = state.legalgs();
 
-  EXPECT_EQ(legal_moves.size(), 2);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(drawn_card)), legal_moves.end());
+  EXPECT_EQ(legal_actions.size(), 2);
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)(drawn_card)), legal_actions.end());
 }
 
 /*
   合法手列挙テスト。複数枚のカードの提出の場合。
   期待する出力: {空のカード, 青1, 青ドロー2, 緑0}。
 */
-TEST(LegalMovesTest, SubmissionMultiple) {
+TEST(LegalgsTest, SubmissionMultiple) {
   Card table_card{Card::kBlueZero};
   Cards deck{allCards()};
   deck.erase(std::find(deck.begin(), deck.end(), table_card));
@@ -1341,7 +1341,7 @@ TEST(LegalMovesTest, SubmissionMultiple) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -1350,19 +1350,19 @@ TEST(LegalMovesTest, SubmissionMultiple) {
       XorShift64()
   };
 
-  auto legal_moves = state.legalActions();
+  auto legal_actions = state.legalgs();
 
-  EXPECT_EQ(legal_moves.size(), 4);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kBlueOne)), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kBlueDrawTwo)), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kGreenZero)), legal_moves.end());
+  EXPECT_EQ(legal_actions.size(), 4);
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)(Card::kBlueOne)), legal_actions.end());
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)(Card::kBlueDrawTwo)), legal_actions.end());
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)(Card::kGreenZero)), legal_actions.end());
 }
 
 /*
   合法手列挙テスト。複数枚のカードの提出の場合。
   期待する出力: {空のカード, 青1, 青ドロー2, 緑0}。空のカード以外のUNO宣言フラグが立っている。
 */
-TEST(LegalMovesTest, SubmissionMultipleOnUno) {
+TEST(LegalgsTest, SubmissionMultipleOnUno) {
   Card table_card{Card::kBlueZero};
   Cards deck{allCards()};
   deck.erase(std::find(deck.begin(), deck.end(), table_card));
@@ -1385,7 +1385,7 @@ TEST(LegalMovesTest, SubmissionMultipleOnUno) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -1394,18 +1394,18 @@ TEST(LegalMovesTest, SubmissionMultipleOnUno) {
       XorShift64()
   };
 
-  auto legal_moves = state.legalActions();
+  auto legal_actions = state.legalgs();
 
-  EXPECT_EQ(legal_moves.size(), 3);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kBlueOne)), legal_moves.end());
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card::kBlueDrawTwo)), legal_moves.end());
+  EXPECT_EQ(legal_actions.size(), 3);
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)(Card::kBlueOne)), legal_actions.end());
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)(Card::kBlueDrawTwo)), legal_actions.end());
 }
 
 /*
   合法手列挙テスト。提出で、出せるカードがない場合。
   期待する出力: {空のカード}。
 */
-TEST(LegalMovesTest, SubmissionNothing) {
+TEST(LegalgsTest, SubmissionNothing) {
   Card table_card{Card::kBlueZero};
   Cards deck{allCards()};
   deck.erase(std::find(deck.begin(), deck.end(), table_card));
@@ -1428,7 +1428,7 @@ TEST(LegalMovesTest, SubmissionNothing) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -1437,17 +1437,17 @@ TEST(LegalMovesTest, SubmissionNothing) {
       XorShift64()
   };
 
-  auto legal_moves = state.legalActions();
+  auto legal_actions = state.legalgs();
 
-  EXPECT_EQ(legal_moves.size(), 1);
-  EXPECT_NE(std::find(legal_moves.begin(), legal_moves.end(), (Move)(Card{})), legal_moves.end());
+  EXPECT_EQ(legal_actions.size(), 1);
+  EXPECT_NE(std::find(legal_actions.begin(), legal_actions.end(), (g)(Card{})), legal_actions.end());
 }
 
 /*
   合法手列挙テスト。既にラウンドが終了している状態。
   期待する出力: {}。
 */
-TEST(LegalMovesTest, AlreadyFinished) {
+TEST(LegalgsTest, AlreadyFinished) {
   // TODO
 }
 
@@ -1474,7 +1474,7 @@ TEST(IsFinishedTest, True) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kColorChoice,
+      gType::kColorChoice,
       3,
       0,
       true,
@@ -1509,7 +1509,7 @@ TEST(IsFinishedTest, False) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kColorChoice,
+      gType::kColorChoice,
       3,
       0,
       true,
@@ -1544,7 +1544,7 @@ TEST(GetScoreTest, NotFinished) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kColorChoice,
+      gType::kColorChoice,
       3,
       0,
       true,
@@ -1582,7 +1582,7 @@ TEST(GetScoreTest, Number) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -1598,7 +1598,7 @@ TEST(GetScoreTest, Number) {
   EXPECT_EQ(state.getScore(3), 0);
 }
 
-TEST(GetScoreTest, Action) {
+TEST(GetScoreTest, g) {
   Card table_card{Card::kBlueZero};
   Cards deck{allCards()};
   deck.erase(std::find(deck.begin(), deck.end(), table_card));
@@ -1628,7 +1628,7 @@ TEST(GetScoreTest, Action) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kSubmission,
+      gType::kSubmission,
       3,
       0,
       true,
@@ -1669,7 +1669,7 @@ TEST(GetCurrentPlayerNum, Normal) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kColorChoice,
+      gType::kColorChoice,
       0,
       1,
       true,
@@ -1678,7 +1678,7 @@ TEST(GetCurrentPlayerNum, Normal) {
       XorShift64()
   };
 
-  auto legal_moves = state.legalActions();
+  auto legal_actions = state.legalgs();
 
   EXPECT_EQ(state.getCurrentPlayerNum(), 1);
 }
@@ -1706,7 +1706,7 @@ TEST(GetPlayerCards, Normal) {
       player_cards,
       std::array<int, UnoConsts::kNumOfPlayers>{0, 1, 2, 3},
       std::array<int, UnoConsts::kNumOfPlayers>{},
-      MoveType::kColorChoice,
+      gType::kColorChoice,
       3,
       0,
       true,
@@ -1715,7 +1715,7 @@ TEST(GetPlayerCards, Normal) {
       XorShift64()
   };
 
-  auto legal_moves = state.legalActions();
+  auto legal_actions = state.legalgs();
 
   for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
     const auto cards = state.getPlayerCards(i);

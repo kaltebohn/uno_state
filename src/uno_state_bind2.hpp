@@ -28,7 +28,7 @@ class UnoStateBind2 final : public UnoState {
                 const std::array<Cards, UnoConsts::kNumOfPlayers> player_cards,
                 const std::array<int, UnoConsts::kNumOfPlayers> player_seats,
                 const std::array<int, UnoConsts::kNumOfPlayers> player_scores,
-                const MoveType current_event,
+                const ActionType current_event,
                 const int prev_player,
                 const int current_player,
                 const bool is_normal_order,
@@ -59,7 +59,7 @@ class UnoStateBind2 final : public UnoState {
         bound_turn_(bound_turn)
       {}
 
-  UnoStateBind2 next(const Move& move) const;
+  UnoStateBind2 next(const Action& action) const;
 
   int getBoundPlayer() const { return bound_player_; }
   int getBoundTurn() const { return bound_turn_; }
@@ -81,7 +81,7 @@ class UnoStateBind2 final : public UnoState {
     const int next_player{nextPlayer()};
     const int next_of_next_player{nextPlayerOf(next_player)};
 
-    state.current_move_type_ = MoveType::kSubmission;
+    state.current_action_type_ = ActionType::kSubmission;
     state.table_color_ = table_color;
     state.prev_player_ = current_player;
     state.current_player_ = next_of_next_player;

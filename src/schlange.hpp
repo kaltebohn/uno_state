@@ -4,13 +4,13 @@
 #include <algorithm>
 #include <unordered_map>
 
-#include "move.hpp"
-#include "move_type.hpp"
+#include "action.hpp"
+#include "action_type.hpp"
 #include "observation.hpp"
 
 class Schlange {
  public:
-  static Move nextMove(const Observation& observation);
+  static Action nextAction(const Observation& observation);
 
   static Color ModeOfColorsInHand(const Cards& hand);
 

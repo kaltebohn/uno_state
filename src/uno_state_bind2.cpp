@@ -1,13 +1,13 @@
 #include "uno_state_bind2.hpp"
 
-UnoStateBind2 UnoStateBind2::next(const Move& move) const {
+UnoStateBind2 UnoStateBind2::next(const Action& action) const {
   /* 既に上がっていたら状態遷移しない。 */
   if (isFinished()) { return *this; }
 
   /* 白いワイルドが出ている場合、その効果処理だけして返す。 */
-  if (std::holds_alternative<Card>(move) &&
-      (std::get<Card>(move) == Card::kWildCustomizable)) {
-    const Card submission{std::get<Card>(move)};
+  if (std::holds_alternative<Card>(action) &&
+      (std::get<Card>(action) == Card::kWildCustomizable)) {
+    const Card submission{std::get<Card>(action)};
     UnoStateBind2 state{*this};
 
     state.acceptSubmission(submission);
@@ -16,7 +16,7 @@ UnoStateBind2 UnoStateBind2::next(const Move& move) const {
 
   /* バインド2以外の効果処理を進める。ここではバインド2を受けたプレイヤの手番になっていないはず。 */
   assert(current_player_ != bound_player_);
-  UnoStateBind2 state{UnoState::next(move), bound_player_, bound_turn_};
+  UnoStateBind2 state{UnoState::next(action), bound_player_, bound_turn_};
 
   /* 次のプレイヤがバインド2を受けていたら、バインド2の効果を処理する。 */
   if (state.bound_turn_ > 0 &&
@@ -29,12 +29,12 @@ UnoStateBind2 UnoStateBind2::next(const Move& move) const {
 
     /* バインド2を受けているプレイヤにあり得る着手型は、提出かチャレンジのどちらか。 */
     /* 提出なら、強制的にカードを引かせ、チャレンジなら、チャレンジできない。 */
-    if (state.current_move_type_ == MoveType::kChallenge) {
+    if (state.current_action_type_ == ActionType::kChallenge) {
       state.giveCards(state.current_player_, 4);
-      state.current_move_type_ = MoveType::kSubmission;
+      state.current_action_type_ = ActionType::kSubmission;
       state.prev_player_ = current_player;
       state.current_player_ = next_player;
-    } else if (state.current_move_type_ == MoveType::kSubmission) {
+    } else if (state.current_action_type_ == ActionType::kSubmission) {
       state.giveCards(state.current_player_, 1);
       state.prev_player_ = current_player;
       state.current_player_ = next_player;
@@ -134,8 +134,8 @@ std::string UnoStateBind2::toJSON() const {
   result += "]";
   result += ",";
 
-  result += "\"currentMoveType\":";
-  result += '"' + moveType2String(current_move_type_) + '"';
+  result += "\"currentActionType\":";
+  result += '"' + actionType2String(current_action_type_) + '"';
   result += ",";
 
   result += "\"prevPlayer\":";

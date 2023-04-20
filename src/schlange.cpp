@@ -1,27 +1,27 @@
 #include "schlange.hpp"
 
-Move Schlange::nextMove(const Observation& observation) {
-  if (observation.current_move_type_ == MoveType::kChallenge) {
+Action Schlange::nextAction(const Observation& observation) {
+  if (observation.current_action_type_ == ActionType::kChallenge) {
     /* チャレンジは常にしない。 */
     return false;
-  } else if (observation.current_move_type_ == MoveType::kColorChoice) {
+  } else if (observation.current_action_type_ == ActionType::kColorChoice) {
     /* 手札中の一番多い色を選ぶ。 */
     return ModeOfColorsInHand(observation.player_card_);
-  } else if (observation.current_move_type_ == MoveType::kSubmission) {
+  } else if (observation.current_action_type_ == ActionType::kSubmission) {
     /* 評価関数が最大値を与えるものを選ぶ。 */
     Cards legal_actions{};
     std::transform(observation.legal_actions_.begin(), observation.legal_actions_.end(),
         std::back_inserter(legal_actions),
-        [](const Move& move) { return std::get<Card>(move); });
+        [](const Action& action) { return std::get<Card>(action); });
     return selectSubmission(legal_actions, observation.table_color_, observation.table_pattern_);
-  } else if (observation.current_move_type_ == MoveType::kSubmissionOfDrawnCard) {
+  } else if (observation.current_action_type_ == ActionType::kSubmissionOfDrawnCard) {
     /* 引いたカードが出せるなら(合法手中にパス以外のカードがあるなら)必ず出す。 */
     for (const auto& submission : observation.legal_actions_) {
       if (!std::get<Card>(submission).isEmpty()) { return submission; }
     }
     return observation.legal_actions_.at(0);
   } else {
-    /* MoveTypeの定義上ここに到達することはないはず。 */
+    /* ActionTypeの定義上ここに到達することはないはず。 */
     assert(false);
   }
 }

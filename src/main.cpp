@@ -16,10 +16,10 @@ int main(void) {
     while (!state.isFinished()) {
       const int current_player{state.getCurrentPlayerNum()};
       if (current_player == 0) {
-        state = state.next(player.nextMove(state.getObservation(current_player)));
+        state = state.next(player.nextAction(state.getObservation(current_player)));
       } else {
         Wuerfel& opponent{opponents.at(current_player - 1)};
-        state = state.next(opponent.nextMove(state.getObservation(current_player)));
+        state = state.next(opponent.nextAction(state.getObservation(current_player)));
       }
     }
     sum_of_score.at(0) += state.getScore(0);

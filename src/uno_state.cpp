@@ -1,21 +1,21 @@
 #include "uno_state.hpp"
 
-std::string moveType2String(const MoveType move_type) {
-  switch (move_type) {
-    case MoveType::kSubmission:
+std::string actionType2String(const ActionType action_type) {
+  switch (action_type) {
+    case ActionType::kSubmission:
       return "Submission";
-    case MoveType::kSubmissionOfDrawnCard:
+    case ActionType::kSubmissionOfDrawnCard:
       return "SubmissionOfDrawCard";
-    case MoveType::kColorChoice:
+    case ActionType::kColorChoice:
       return "ColorChoice";
-    case MoveType::kChallenge:
+    case ActionType::kChallenge:
       return "Challenge";
     default:
       assert(false);
   }
 }
 
-UnoState UnoState::next(Move move) const {
+UnoState UnoState::next(Action action) const {
   /* 既に上がっていたら状態遷移しない。 */
   if (isFinished()) { return *this; }
 
@@ -24,19 +24,19 @@ UnoState UnoState::next(Move move) const {
 
   /* カードの効果に関する処理はすべてkSubmissionのときに行う。 */
   /* 他のイベントでは、着手への対応と現在プレイヤの変更だけする。 */
-  if (current_move_type_ == MoveType::kColorChoice) {
-    return nextWhenColorChoice(state, std::get<Color>(move));
+  if (current_action_type_ == ActionType::kColorChoice) {
+    return nextWhenColorChoice(state, std::get<Color>(action));
   }
 
-  if (current_move_type_ == MoveType::kChallenge) {
-    return nextWhenChallenge(state, std::get<ChallengeFlag>(move));
+  if (current_action_type_ == ActionType::kChallenge) {
+    return nextWhenChallenge(state, std::get<ChallengeFlag>(action));
   }
 
-  if (current_move_type_ == MoveType::kSubmissionOfDrawnCard) {
-    Card submission = std::get<Card>(move);
+  if (current_action_type_ == ActionType::kSubmissionOfDrawnCard) {
+    Card submission = std::get<Card>(action);
 
     if (submission.isEmpty()) {
-      state.current_move_type_ = MoveType::kSubmission;
+      state.current_action_type_ = ActionType::kSubmission;
       state.prev_player_ = current_player_;
       state.current_player_ = nextPlayer();
       return state;
@@ -46,19 +46,19 @@ UnoState UnoState::next(Move move) const {
           !submission.isLegal(table_color_, table_pattern_)) {
         /* 着手が違法なら、ペナルティとして2枚カードを引く。 */
         state.giveCards(current_player_, 2);
-        state.current_move_type_ = MoveType::kSubmission;
+        state.current_action_type_ = ActionType::kSubmission;
         state.prev_player_ = current_player_;
         state.current_player_ = nextPlayer();
         return state;
       } else {
-        return nextWhenSubmission(state, std::get<Card>(move));
+        return nextWhenSubmission(state, std::get<Card>(action));
       }
     }
   }
 
   /* 以下カード提出の場合。 */
-  assert(std::holds_alternative<Card>(move));
-  return nextWhenSubmission(state, std::get<Card>(move));
+  assert(std::holds_alternative<Card>(action));
+  return nextWhenSubmission(state, std::get<Card>(action));
 }
 
 UnoState UnoState::nextWhenColorChoice(UnoState& state, const Color color) const {
@@ -73,9 +73,9 @@ UnoState UnoState::nextWhenColorChoice(UnoState& state, const Color color) const
 
   /* ワイルドドロー4の場合、色選択後にチャレンジが発生する。 */
   if (std::holds_alternative<CardAction>(table_pattern_) && std::get<CardAction>(table_pattern_) == CardAction::kWildDraw4) {
-    state.current_move_type_ = MoveType::kChallenge;
+    state.current_action_type_ = ActionType::kChallenge;
   } else {
-    state.current_move_type_ = MoveType::kSubmission;
+    state.current_action_type_ = ActionType::kSubmission;
   }
   return state;
 }
@@ -94,7 +94,7 @@ UnoState UnoState::nextWhenIlligalColorChoice(UnoState& state) const {
   state.giveCards(current_player_, 2);
 
   /* 手番を飛ばす。 */
-  state.current_move_type_ = MoveType::kSubmission;
+  state.current_action_type_ = ActionType::kSubmission;
   state.current_player_ = nextPlayer();
   state.prev_player_ = current_player;
 
@@ -106,7 +106,7 @@ UnoState UnoState::nextWhenChallenge(UnoState& state, const ChallengeFlag will_c
   const int challenged_player = prev_player_;
 
   /* チャレンジ後は必ずカード提出。 */
-  state.current_move_type_ = MoveType::kSubmission;
+  state.current_action_type_ = ActionType::kSubmission;
 
   /* チャレンジしなかった場合、今のプレイヤに4枚引かせる。 */
   if (!will_challenge) {
@@ -173,7 +173,7 @@ UnoState UnoState::nextWhenSubmission(UnoState&state, const Card& submission) co
 
   /* 記号カードでなければここで終わり。 */
   if (!std::holds_alternative<CardAction>(submission.getPattern())) {
-    state.current_move_type_ = MoveType::kSubmission;
+    state.current_action_type_ = ActionType::kSubmission;
     state.current_player_ = nextPlayer();
     state.prev_player_ = current_player_;
     return state;
@@ -201,7 +201,7 @@ UnoState UnoState::nextWhenSubmission(UnoState&state, const Card& submission) co
 
 UnoState UnoState::nextWhenIlligalSubmission(UnoState& state) const {
   const int current_player{current_player_};
-  state.current_move_type_ = MoveType::kSubmission;
+  state.current_action_type_ = ActionType::kSubmission;
   state.giveCards(current_player_, 2);
   state.current_player_ = nextPlayer();
   state.prev_player_ = current_player;
@@ -210,7 +210,7 @@ UnoState UnoState::nextWhenIlligalSubmission(UnoState& state) const {
 
 UnoState UnoState::nextWhenEmptyCardSubmission(UnoState& state) const {
   const int current_player{current_player_};
-  state.current_move_type_ = MoveType::kSubmissionOfDrawnCard;
+  state.current_action_type_ = ActionType::kSubmissionOfDrawnCard;
   state.giveCards(current_player, 1);
   return state;
 }
@@ -226,36 +226,36 @@ void UnoState::acceptSubmission(const Card& submission) {
   }
 }
 
-std::vector<Move> UnoState::legalActions() const {
+std::vector<Action> UnoState::legalActions() const {
   if (isFinished()) {
     return {};
   }
 
-  if (current_move_type_ == MoveType::kSubmission) {
+  if (current_action_type_ == ActionType::kSubmission) {
     std::vector<Card> submissions{legalCards()};
-    std::vector<Move> result(submissions.size());
+    std::vector<Action> result(submissions.size());
     std::transform(submissions.begin(), submissions.end(), result.begin(),
         [](Card submission) {
-          return (Move)submission;
+          return (Action)submission;
         });
     return result;
-  } else if (current_move_type_ == MoveType::kSubmissionOfDrawnCard) {
+  } else if (current_action_type_ == ActionType::kSubmissionOfDrawnCard) {
     const Card submission_of_drawn_card{player_cards_.at(current_player_).back()};
     std::vector<Card> submissions{Card{}};
     if (submission_of_drawn_card.isLegal(table_color_, table_pattern_)) {
       submissions.push_back(submission_of_drawn_card);
     }
 
-    std::vector<Move> result(submissions.size());
+    std::vector<Action> result(submissions.size());
     std::transform(submissions.begin(), submissions.end(), result.begin(),
         [](Card submission) {
-          return (Move)submission;
+          return (Action)submission;
         });
 
     return result;
-  } else if (current_move_type_ == MoveType::kColorChoice) {
+  } else if (current_action_type_ == ActionType::kColorChoice) {
     return {Color::kBlue, Color::kGreen, Color::kRed, Color::kYellow};
-  } else if (current_move_type_ == MoveType::kChallenge) {
+  } else if (current_action_type_ == ActionType::kChallenge) {
     return {true, false};
   }
 
@@ -324,9 +324,9 @@ std::string UnoState::toString() const {
   }
   result += "\n";
 
-  result += "CurrentMoveType\n";
+  result += "CurrentActionType\n";
   result += "  ";
-  result += moveType2String(current_move_type_);
+  result += actionType2String(current_action_type_);
   result += "\n";
 
   result += "PrevPlayer\n";
@@ -417,8 +417,8 @@ std::string UnoState::toJSON() const {
   result += "]";
   result += ",";
 
-  result += "\"currentMoveType\":";
-  result += '"' + moveType2String(current_move_type_) + '"';
+  result += "\"currentActionType\":";
+  result += '"' + actionType2String(current_action_type_) + '"';
   result += ",";
 
   result += "\"prevPlayer\":";
