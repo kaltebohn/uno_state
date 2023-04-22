@@ -147,8 +147,10 @@ class Card {
 
 using Cards = std::vector<Card>;
 
-static constexpr int kNumOfCardTypes = 56;
-static constexpr int kNumOfCards = 112;
+// static constexpr int kNumOfCardTypes = 56;
+static constexpr int kNumOfCardTypes = 55;
+// static constexpr int kNumOfCards = 112;
+static constexpr int kNumOfCards = 109;
 
 Cards allCards();
 
