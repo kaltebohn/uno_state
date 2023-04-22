@@ -3,10 +3,12 @@
 
 #include "uno_state.hpp"
 
+/* ランダムに行動する対戦プレイヤ。 */
 class Wuerfel {
  public:
   Wuerfel(XorShift64 random_engine) : random_engine_(random_engine) {}
 
+  /* 与えられた観測における次の手を決める。 */
   Action nextAction(const Observation& observation) {
     return randomAction(observation, random_engine_);
   }
@@ -25,7 +27,7 @@ class Wuerfel {
     std::uniform_int_distribution<int> dist(0, actions.size() - 1);
     return actions.at(dist(random_engine));
   }
- 
+
  private:
   XorShift64 random_engine_;
 };
