@@ -195,6 +195,11 @@ class UnoState {
   Cards getPlayerCards(int player_num) const { return player_cards_.at(player_num); }
   int getPlayerSeats(const int player_num) const { return player_seats_.at(player_num); }
   double getScore(const int player_num) const { return player_scores_.at(player_num); }
+  std::vector<double> getScores() const {
+    /* インターフェース的には実数ベクターのほうが良い。 */
+    std::vector<double> scores{};
+    std::copy(player_scores_.begin(), player_scores_.end(), std::back_inserter(scores));
+    return scores; }
   ActionType getCurrentActionType() const { return current_action_type_; }
   int getPrevPlayerNum() const { return prev_player_; }
   std::array<int, UnoConsts::kNumOfPlayers> getAllPlayerSeats() const { return player_seats_; }
