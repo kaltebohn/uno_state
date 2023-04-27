@@ -282,7 +282,9 @@ std::string Card::toString() const {
 }
 
 int Card::toScore() const {
-  if (std::holds_alternative<CardNumber>(getPattern())) {
+  if (isEmpty()) {
+    return 0;
+  } else if (std::holds_alternative<CardNumber>(getPattern())) {
     return cardNumber2Int(std::get<CardNumber>(getPattern()));
   } else if (getColor() != Color::kWild) {
     return UnoConsts::kScoreOfAction;
