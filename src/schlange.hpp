@@ -14,9 +14,9 @@ class Schlange {
   /* 与えられた観測における次の手を決める。 */
   static Action nextAction(const Observation& observation);
 
- private:
   static Color ModeOfColorsInHand(const Cards& hand);
 
+ private:
   static Card selectSubmission(const Cards& hand, const Color& table_color, const CardPattern& table_pattern);
 
   static int evaluateSubmission(const Card& card);
