@@ -1,20 +1,5 @@
 #include "uno_state.hpp"
 
-std::string actionType2String(const ActionType action_type) {
-  switch (action_type) {
-    case ActionType::kSubmission:
-      return "Submission";
-    case ActionType::kSubmissionOfDrawnCard:
-      return "SubmissionOfDrawCard";
-    case ActionType::kColorChoice:
-      return "ColorChoice";
-    case ActionType::kChallenge:
-      return "Challenge";
-    default:
-      assert(false);
-  }
-}
-
 UnoState UnoState::next(Action action) const {
   /* 既に上がっていたら状態遷移しない。 */
   if (isFinished()) { return *this; }
