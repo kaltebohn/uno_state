@@ -35,7 +35,7 @@ $(TEST_OUTDIR)/submission_test:	$(TEST_SRCDIR)/submission_test.cpp $(OBJDIR)/act
 	$(CC) $(TEST_CFLAGS) -o $@ $^
 
 
-$(TEST_OUTDIR)/uno_state_test:	$(TEST_SRCDIR)/uno_state_test.cpp $(OBJDIR)/uno_state.o $(OBJDIR)/action.o $(OBJDIR)/card.o
+$(TEST_OUTDIR)/uno_state_test:	$(TEST_SRCDIR)/uno_state_test.cpp $(OBJDIR)/uno_state.o $(OBJDIR)/action.o $(OBJDIR)/action_type.o $(OBJDIR)/card.o
 	$(CC) $(TEST_CFLAGS) -o $@ $^
 
 $(TEST_OUTDIR)/uno_state_bind2_test:

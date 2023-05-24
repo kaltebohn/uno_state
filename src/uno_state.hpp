@@ -18,8 +18,6 @@
 #include "observation.hpp"
 #include "uno_consts.hpp"
 
-std::string actionType2String(const ActionType action_type);
-
 class UnoState {
  public:
   friend std::ostream& operator<<(std::ostream& os, const UnoState& src) {
@@ -126,6 +124,8 @@ class UnoState {
       }
     }
   }
+
+  /* テスト用。 */
   UnoState(std::vector<Card> deck,
            std::vector<Card> discards,
            std::array<Cards,
@@ -170,6 +170,7 @@ class UnoState {
         [](Cards cards){ return cards.size() == 0; });
   }
 
+  /* 指定したプレイヤに合わせ、現在状態から成る観測を返す。*/
   Observation getObservation(const int player) const {
     std::array<int, UnoConsts::kNumOfPlayers> player_card_qtys{};
     std::transform(player_cards_.begin(), player_cards_.end(), player_card_qtys.begin(),
@@ -208,15 +209,6 @@ class UnoState {
   Color getTableColor() const { return table_color_; }
   CardPattern getTablePattern() const { return table_pattern_; }
 
-  std::array<int, UnoConsts::kNumOfPlayers> getQuantityOfPlayerCards() const {
-    std::array<int, UnoConsts::kNumOfPlayers> result{};
-    std::transform(player_cards_.begin(), player_cards_.end(), result.begin(),
-        [](const Cards& cards) {
-          return cards.size();
-        });
-    return result;
-  }
-
   /* テスト用。 */
   virtual bool operator ==(const UnoState& state) const {
     if (!std::equal(state.deck_.cbegin(), state.deck_.cend(), deck_.begin())) { return false; }
@@ -238,6 +230,7 @@ class UnoState {
 
   virtual std::string toString() const;
 
+  /* 現在状態を別リポジトリのuno_state_viewerで参照できるJSONに整形して返す。 */
   virtual std::string toJSON() const;
 
   virtual void print() const { std::cout << *this; }

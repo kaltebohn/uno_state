@@ -9,17 +9,19 @@
 
 #include "uno_consts.hpp"
 
+/* カードの色。 */
 enum class Color {
   kBlue,
   kGreen,
   kRed,
   kYellow,
   kWild,
-  kNull
+  kNull // パスに用いる空のカード用。
 };
 
 std::string color2String(const Color& color);
 
+/* 数字カードの数字。 */
 enum class CardNumber {
   kZero,
   kOne,
@@ -36,6 +38,7 @@ enum class CardNumber {
 std::string cardNumber2String(const CardNumber card_number);
 int cardNumber2Int(const CardNumber card_number);
 
+/* 記号カードの記号。 */
 enum class CardAction {
   kDrawTwo,
   kReverse,
@@ -48,6 +51,7 @@ enum class CardAction {
 
 std::string cardAction2String(const CardAction card_action);
 
+/* カードの模様。数字と記号を一般化したもの。 */
 using CardPattern = std::variant<std::monostate, CardNumber, CardAction>;
 
 std::string cardPattern2String(const CardPattern card_pattern);
@@ -62,23 +66,27 @@ class Card {
 
   /* このカードが場に対して合法か？ワイルドドロー4を反則で出す場合も合法として扱う。 */
   bool isLegal(Color table_color, CardPattern table_pattern) const {
-    if (color_ == Color::kNull || color_ == Color::kWild) { return true; }
+    if (isEmpty() || color_ == Color::kWild) { return true; }
 
     return color_ == table_color || pattern_ == table_pattern;
   }
 
+  /* 空のカード。 */
   constexpr Card() = default;
 
+  /* カードを好きな色・模様で初期化。 */
   constexpr Card(const Color c, const CardPattern p) : color_(c), pattern_(p) {}
 
   constexpr Color getColor() const { return color_; }
   constexpr CardPattern getPattern() const { return pattern_; }
 
+  /* 空のカードか？ */
   constexpr bool isEmpty() const { return std::holds_alternative<std::monostate>(pattern_); }
 
   constexpr bool operator ==(const Card& c) const { return color_ == c.color_ && pattern_ == c.pattern_; }
   constexpr bool operator !=(const Card& c) const { return !(*this == c); }
 
+  /* デッキに格納されているカードをリテラルのように扱えるようにしている。 */
   static const Card  kBlueZero;
   static const Card  kBlueOne;
   static const Card  kBlueTwo;
@@ -138,6 +146,7 @@ class Card {
 
   std::string toString() const;
 
+  /* このカードを持っていたときの減点を正の値で返す。 */
   int toScore() const;
 
  private:
@@ -147,9 +156,12 @@ class Card {
 
 using Cards = std::vector<Card>;
 
-static constexpr int kNumOfCardTypes = 56;
-static constexpr int kNumOfCards = 112;
+// static constexpr int kNumOfCardTypes = 56;
+static constexpr int kNumOfCardTypes = 55;
+// static constexpr int kNumOfCards = 112;
+static constexpr int kNumOfCards = 109;
 
+/* UNOのルールに従い、最初の山札を構成するカード群を返す。 */
 Cards allCards();
 
 #endif // CARD_HPP_

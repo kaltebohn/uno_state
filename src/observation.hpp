@@ -7,6 +7,7 @@
 #include "action.hpp"
 #include "action_type.hpp"
 
+/* ゲームの観測。ゲーム中にプレイヤが知りうる情報。 */
 struct Observation {
   Cards discards_;
   Cards player_card_;
