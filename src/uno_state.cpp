@@ -350,8 +350,9 @@ std::string UnoState::toJSON() const {
     result += "\"Empty\"";
   } else {
     result += "[";
-    for (const Card card : deck_) {
-      result += '"' + card.toString() + '"' + ",";
+    for (unsigned i = 0; i < deck_.size(); i++) {
+      result += '"' + deck_.at(i).toString() + '"';
+      if (i != deck_.size() - 1) { result += ","; }
     }
     result += "]";
   }
@@ -362,8 +363,9 @@ std::string UnoState::toJSON() const {
     result += "\"Empty\"";
   } else {
     result += "[";
-    for (const Card card : discards_) {
-      result += '"' + card.toString() + '"' + ",";
+    for (unsigned i = 0; i < discards_.size(); i++) {
+      result += '"' + discards_.at(i).toString() + '"';
+      if (i != discards_.size() - 1) { result += ","; }
     }
     result += "]";
   }
@@ -376,12 +378,13 @@ std::string UnoState::toJSON() const {
       result += "\"Empty\"";
     } else {
       result += "[";
-      for (const Card card : player_cards_.at(i)) {
-        result += '"' + card.toString() + '"' + ",";
+      for (unsigned j = 0; j < player_cards_.at(i).size(); j++) {
+        result += '"' + player_cards_.at(i).at(j).toString() + '"';
+        if (j != player_cards_.at(i).size() - 1) { result += ","; }
       }
       result += "]";
     }
-    result += ",";
+    if (i != UnoConsts::kNumOfPlayers - 1) { result += ","; }
   }
   result += "]";
   result += ",";
@@ -389,7 +392,8 @@ std::string UnoState::toJSON() const {
   result += "\"playerSeats\":";
   result += "[";
   for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-    result += std::to_string(player_seats_.at(i)) + ",";
+    result += std::to_string(player_seats_.at(i));
+    if (i != UnoConsts::kNumOfPlayers - 1) { result += ","; }
   }
   result += "]";
   result += ",";
@@ -397,7 +401,8 @@ std::string UnoState::toJSON() const {
   result += "\"playerScores\":";
   result += "[";
   for (int i = 0; i < UnoConsts::kNumOfPlayers; i++) {
-    result += std::to_string(player_scores_.at(i)) + ",";
+    result += std::to_string(player_scores_.at(i));
+    if (i != UnoConsts::kNumOfPlayers - 1) { result += ","; }
   }
   result += "]";
   result += ",";
@@ -424,7 +429,6 @@ std::string UnoState::toJSON() const {
 
   result += "\"tablePattern\":";
   result += '"' + cardPattern2String(table_pattern_) + '"';
-  result += ",";
 
   result += "}";
 
