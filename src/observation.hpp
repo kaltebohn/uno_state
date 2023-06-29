@@ -12,7 +12,7 @@ struct Observation {
   Cards discards_;
   Cards player_card_;
   std::vector<Action> legal_actions_;
-  std::array<int, UnoConsts::kNumOfPlayers> player_card_qtys; // プレイヤ番号で各プレイヤの手札枚数にアクセス。
+  std::array<int, UnoConsts::kNumOfPlayers> player_card_qtys_; // プレイヤ番号で各プレイヤの手札枚数にアクセス。
   std::array<int, UnoConsts::kNumOfPlayers> player_seats_; // プレイヤ番号で各プレイヤの席にアクセス。
   ActionType current_action_type_;
   int prev_player_;
